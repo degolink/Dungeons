@@ -14,8 +14,8 @@
 
 <h1 class="text-3xl md:text-5xl font-bold text-yellow-300 text-center mt-8 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 5px #ffcc00;">Pantalla del Narrador</h1>
 
-<div class="flex flex-wrap -mx-2">
-    <div class="w-full md:w-1/2 px-2" th:each="personaje : ${personajes}">
+<div class="flex flex-wrap justify-center gap-4 mx-auto max-w-7xl">
+    <div class="w-full md:w-5/6 lg:w-4/5 px-2" th:each="personaje : ${personajes}">
         <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" style="border-color: #444; box-shadow: 0 0 10px #000;">
             <div class="mb-3">
                 <span class="text-xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</span>
@@ -23,15 +23,22 @@
                 <span th:text="${personaje.clase}">Mago</span>)</span>
             </div>
             <div class="space-y-2 text-gray-200">
-                <p>HP: <span class="font-bold text-yellow-400" style="text-shadow: 0 0 3px #ffc107;" th:text="${personaje.puntosVida}">30</span>/<span th:text="${personaje.puntosVidaMax}">40</span></p>
+                <!-- Estadísticas -->
+                <div class="pb-3 border-b border-gray-600">
+                    <p class="text-yellow-300 font-bold mb-2">Estadísticas</p>
+                    <p>HP: <span class="font-bold text-yellow-400" style="text-shadow: 0 0 3px #ffc107;" th:text="${personaje.puntosVida}">30</span>/<span th:text="${personaje.puntosVidaMax}">40</span></p>
+                </div>
 
-                <div class="space-y-1">
+                <!-- Monedas -->
+                <div class="pb-3 border-b border-gray-600">
+                    <p class="text-yellow-300 font-bold mb-2">Monedas</p>
+                    <div class="space-y-1">
                     <div class="flex items-center">
                         <span class="w-24">Cobre:</span>
                         <input type="number" min="0" step="1" th:value="${personaje.cobre} ?: 0" 
                                th:id="${'mon_cobre_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'cobre\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -39,7 +46,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.plata} ?: 0" 
                                th:id="${'mon_plata_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'plata\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -47,7 +54,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.oro} ?: 0" 
                                th:id="${'mon_oro_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'oro\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -55,32 +62,45 @@
                         <input type="number" min="0" step="1" th:value="${personaje.platino} ?: 0" 
                                th:id="${'mon_platino_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'platino\')'">Actualizar</button>
                     </div>
                 </div>
 
-                <p>Estados Alterados:</p>
-                <ul class="list-disc list-inside">
+                <!-- Estados Alterados -->
+                <div class="pb-3 border-b border-gray-600">
+                    <p class="text-yellow-300 font-bold mb-2">Estados Alterados</p>
+                    <ul class="list-disc list-inside">
                     <li th:each="condicion : ${personaje.condiciones}" th:text="${condicion.nombre}">Aturdido</li>
-                </ul>
+                    </ul>
+                </div>
 
-                <p>Inventario:</p>
-                <div th:each="item : ${personaje.inventario}" class="flex justify-between items-center py-1">
-                    <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
-                    <span class="mx-2">x<span th:text="${item.cantidad}">1</span></span>
-                    <span th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
-                    <button class="bg-green-600 hover:bg-green-700 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
-                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
-                </div> 
+                <!-- Inventario -->
+                <div class="pb-3 border-b border-gray-600">
+                    <p class="text-yellow-300 font-bold mb-2">Inventario</p>
+                    <div th:each="item : ${personaje.inventario}" class="flex justify-between items-center py-1 text-sm">
+                        <div class="flex-1">
+                            <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
+                            <span class="mx-2">x<span th:text="${item.cantidad}">1</span></span>
+                            <span th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'" >Usar</button>
+                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'" >Equipar</button>
+                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'" >Desequipar</button>
+                        </div>
+                    </div>
+                </div>
 
-                <p>Hechizos:</p>
+                <!-- Hechizos -->
+                <div>
+                    <p class="text-yellow-300 font-bold mb-2">Hechizos</p>
                 <div th:each="hechizo : ${personaje.hechizos}" class="bg-gray-700 rounded p-2 text-sm mb-2">
                     <span th:text="${hechizo.nombre}" class="font-semibold text-yellow-300">Misil Mágico</span> 
                     (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
                     <br>
                     <small th:text="${hechizo.descripcion}" class="text-gray-300">Un proyectil mágico que causa daño.</small>
+                </div>
                 </div>
             </div>
         </div>
