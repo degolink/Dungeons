@@ -6,7 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.service.PersonajeService;
@@ -35,6 +38,7 @@ public class NarradorController {
     public String mostrarPantalla(Model model) {
         List<Personaje> personajes = personajeService.listar();  // lista los 4 personajes
         model.addAttribute("personajes", personajes);    
+        model.addAttribute("newPersonaje", new Personaje());
         System.out.println("Personajes encontrados: " + personajes.size());
        // lo manda al HTML
         return "narrador";  // Thymeleaf buscará resources/templates/narrador.html
@@ -95,4 +99,18 @@ public class NarradorController {
         return personajeService.guardar(personaje);
     }
     
+    // crear personaje nuevo
+    @PostMapping("/personaje")
+    public String crearPersonaje(Personaje personaje) {
+        personajeService.guardar(personaje);
+        return "redirect:/narrador";
+    }
+
+    // eliminar personaje
+    @DeleteMapping("/personaje/{id}")
+    @ResponseBody
+    public void borrarPersonaje(@PathVariable Long id) {
+        personajeService.borrar(id);
+    }
+
 }

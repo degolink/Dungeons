@@ -17,10 +17,11 @@
 <div class="flex flex-wrap justify-center gap-4 mx-auto max-w-7xl">
     <div class="w-full md:w-5/6 lg:w-4/5 px-2" th:each="personaje : ${personajes}">
         <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" style="border-color: #444; box-shadow: 0 0 10px #000;">
-            <div class="mb-3">
+            <div class="mb-3 relative">
                 <span class="text-xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</span>
                 <span class="text-sm text-gray-400">(Nivel <span th:text="${personaje.nivel}">4</span> 
                 <span th:text="${personaje.clase}">Mago</span>)</span>
+                <button class="absolute top-0 right-0 text-red-500 hover:text-red-400 text-xs" th:onclick="'eliminarPersonaje(' + ${personaje.id} + ')'">✖</button>
             </div>
             <div class="space-y-2 text-gray-200">
                 <!-- Estadísticas -->
@@ -107,6 +108,118 @@
     </div>
 </div>
 
+<div class="w-full flex justify-center mt-6 mb-4">
+    <button onclick="openDrawer()" class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Nuevo Personaje</button>
+</div>
+
+<!-- drawer for crear personaje -->
+<div id="drawer" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeDrawer()"></div>
+  <div class="relative bg-gray-800 w-full max-w-md h-full p-6 overflow-auto">
+      <h2 class="text-xl font-bold mb-4">Crear nuevo personaje</h2>
+      <form th:action="@{/personaje}" th:object="${newPersonaje}" method="post" class="space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+              <div>
+                  <label class="block text-sm text-gray-300">Nombre</label>
+                  <input type="text" th:field="*{nombre}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Apodo</label>
+                  <input type="text" th:field="*{apodo}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Clase</label>
+                  <input type="text" th:field="*{clase}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Raza</label>
+                  <input type="text" th:field="*{raza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Alineamiento</label>
+                  <input type="text" th:field="*{alineamiento}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Nivel</label>
+                  <input type="number" min="1" th:field="*{nivel}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Experiencia</label>
+                  <input type="number" min="0" th:field="*{experiencia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Fuerza</label>
+                  <input type="number" min="0" th:field="*{fuerza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Destreza</label>
+                  <input type="number" min="0" th:field="*{destreza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Constitución</label>
+                  <input type="number" min="0" th:field="*{constitucion}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Inteligencia</label>
+                  <input type="number" min="0" th:field="*{inteligencia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Sabiduría</label>
+                  <input type="number" min="0" th:field="*{sabiduria}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Carisma</label>
+                  <input type="number" min="0" th:field="*{carisma}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">PV</label>
+                  <input type="number" min="0" th:field="*{puntosVida}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">PV Máx</label>
+                  <input type="number" min="0" th:field="*{puntosVidaMax}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">PE</label>
+                  <input type="number" min="0" th:field="*{puntosEnergia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Cobre</label>
+                  <input type="number" min="0" th:field="*{cobre}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Plata</label>
+                  <input type="number" min="0" th:field="*{plata}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Oro</label>
+                  <input type="number" min="0" th:field="*{oro}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+              <div>
+                  <label class="block text-sm text-gray-300">Platino</label>
+                  <input type="number" min="0" th:field="*{platino}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+              </div>
+          </div>
+          <div>
+              <label class="block text-sm text-gray-300">Historia</label>
+              <textarea th:field="*{historia}" rows="3" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"></textarea>
+          </div>
+          <div>
+              <label class="block text-sm text-gray-300">Motivaciones</label>
+              <textarea th:field="*{motivaciones}" rows="2" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"></textarea>
+          </div>
+          <div class="flex items-center gap-2">
+              <input type="checkbox" th:field="*{activo}" class="bg-gray-600"/>
+              <label class="text-sm text-gray-300">Activo</label>
+          </div>
+          <div class="flex gap-2 mt-4">
+              <button type="submit" class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Guardar</button>
+              <button type="button" class="text-gray-300 hover:text-white" onclick="closeDrawer()">Cancelar</button>
+          </div>
+      </form>
+  </div>
+</div>
+
 <!-- toast notification container -->
 <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300" role="status"></div>
 
@@ -116,6 +229,21 @@
     function equiparItem(id) {
     }
     function desequiparItem(id) {
+    }
+    function openDrawer() {
+        document.getElementById('drawer').classList.remove('hidden');
+    }
+    function closeDrawer() {
+        document.getElementById('drawer').classList.add('hidden');
+    }
+    function eliminarPersonaje(id) {
+        if (!confirm('¿Eliminar este personaje?')) return;
+        fetch(`/personaje/${id}`, { method: 'DELETE' })
+            .then(resp => {
+                if (resp.ok) location.reload();
+                else throw new Error();
+            })
+            .catch(() => showToast('Error al eliminar', false));
     }
 
     function showToast(message, isSuccess=true) {
