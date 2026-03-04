@@ -46,5 +46,53 @@ public class NarradorController {
         
         return entity;
     }
+
+    /**
+     * Actualiza la cantidad de una moneda para un personaje.
+     * Recibe el id del personaje en la ruta y los parámetros 'tipo' y 'valor'.
+     * Devuelve el personaje actualizado (serializado como JSON).
+     */
+    @PostMapping("/personaje/{id}/moneda")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Personaje actualizarMoneda(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam String tipo,
+            @org.springframework.web.bind.annotation.RequestParam Integer valor) {
+
+        Personaje personaje = personajeService.buscarPorId(id)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Personaje no encontrado"));
+
+        // asegurarse de que no haya nulls en las monedas para evitar errores de integridad
+        if (personaje.getCobre() == null) personaje.setCobre(0);
+        if (personaje.getPlata() == null) personaje.setPlata(0);
+        if (personaje.getOro() == null) personaje.setOro(0);
+        if (personaje.getPlatino() == null) personaje.setPlatino(0);
+
+        // normalizamos el valor para que no sea negativo
+        if (valor == null || valor < 0) {
+            valor = 0;
+        }
+
+        switch (tipo.toLowerCase()) {
+            case "cobre":
+                personaje.setCobre(valor);
+                break;
+            case "plata":
+                personaje.setPlata(valor);
+                break;
+            case "oro":
+                personaje.setOro(valor);
+                break;
+            case "platino":
+                personaje.setPlatino(valor);
+                break;
+            default:
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "Tipo de moneda desconocido");
+        }
+
+        return personajeService.guardar(personaje);
+    }
     
 }

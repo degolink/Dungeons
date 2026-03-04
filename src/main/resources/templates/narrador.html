@@ -3,58 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <title>Pantalla del Narrador</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/narrador.css">
+    <!-- Tailwind CSS via CDN for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Retro gaming font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 p-4 font-cursive">
 
-<h1>Pantalla del Narrador</h1>
+<h1 class="text-3xl md:text-5xl font-bold text-yellow-300 text-center mt-8 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 5px #ffcc00;">Pantalla del Narrador</h1>
 
-<div class="row">
-    <div class="col-md-6" th:each="personaje : ${personajes}">
-        <div class="card">
-            <div class="card-header">
-                <span th:text="${personaje.nombre}">Nombre</span>
-                (Nivel <span th:text="${personaje.nivel}">4</span> 
-                <span th:text="${personaje.clase}">Mago</span>)
+<div class="flex flex-wrap -mx-2">
+    <div class="w-full md:w-1/2 px-2" th:each="personaje : ${personajes}">
+        <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" style="border-color: #444; box-shadow: 0 0 10px #000;">
+            <div class="mb-3">
+                <span class="text-xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</span>
+                <span class="text-sm text-gray-400">(Nivel <span th:text="${personaje.nivel}">4</span> 
+                <span th:text="${personaje.clase}">Mago</span>)</span>
             </div>
-            <div class="card-body">
-                <p>HP: <span class="stat" th:text="${personaje.puntosVida}">30</span>/<span th:text="${personaje.puntosVidaMax}">40</span></p>
+            <div class="space-y-2 text-gray-200">
+                <p>HP: <span class="font-bold text-yellow-400" style="text-shadow: 0 0 3px #ffc107;" th:text="${personaje.puntosVida}">30</span>/<span th:text="${personaje.puntosVidaMax}">40</span></p>
 
-                <p>
-                    Monedas: 
-                    <span th:text="${personaje.cobre} ?: 0"></span> C, 
-                    <span th:text="${personaje.plata} ?: 0"></span> P, 
-                    <span th:text="${personaje.oro} ?: 0"></span> O, 
-                    <span th:text="${personaje.platino} ?: 0"></span> Platino
-                </p>
+                <div class="space-y-1">
+                    <div class="flex items-center">
+                        <span class="w-24">Cobre:</span>
+                        <input type="number" min="0" step="1" th:value="${personaje.cobre} ?: 0" 
+                               th:id="${'mon_cobre_' + personaje.id}"
+                               class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
+                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'cobre\')'">Actualizar</button>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-24">Plata:</span>
+                        <input type="number" min="0" step="1" th:value="${personaje.plata} ?: 0" 
+                               th:id="${'mon_plata_' + personaje.id}"
+                               class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
+                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'plata\')'">Actualizar</button>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-24">Oro:</span>
+                        <input type="number" min="0" step="1" th:value="${personaje.oro} ?: 0" 
+                               th:id="${'mon_oro_' + personaje.id}"
+                               class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
+                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'oro\')'">Actualizar</button>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-24">Platino:</span>
+                        <input type="number" min="0" step="1" th:value="${personaje.platino} ?: 0" 
+                               th:id="${'mon_platino_' + personaje.id}"
+                               class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
+                        <button class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'platino\')'">Actualizar</button>
+                    </div>
+                </div>
 
                 <p>Estados Alterados:</p>
-                <ul>
+                <ul class="list-disc list-inside">
                     <li th:each="condicion : ${personaje.condiciones}" th:text="${condicion.nombre}">Aturdido</li>
                 </ul>
 
                 <p>Inventario:</p>
-                <div th:each="item : ${personaje.inventario}" class="inventory-item">
-                    <span th:text="${item.itemBase.nombre}">Espada Larga</span>
-                    <span>x<span th:text="${item.cantidad}">1</span></span>
-                    <span th:text="${item.equipado ? 'Equipado' : ''}"></span>
-                    <button class="btn btn-sm btn-success" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
-                    <button class="btn btn-sm btn-primary" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
-                    <button class="btn btn-sm btn-warning" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
+                <div th:each="item : ${personaje.inventario}" class="flex justify-between items-center py-1">
+                    <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
+                    <span class="mx-2">x<span th:text="${item.cantidad}">1</span></span>
+                    <span th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
+                    <button class="bg-green-600 hover:bg-green-700 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
+                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
                 </div> 
 
                 <p>Hechizos:</p>
-                <div th:each="hechizo : ${personaje.hechizos}" class="hechizo">
-                    <span th:text="${hechizo.nombre}">Misil Mágico</span> 
+                <div th:each="hechizo : ${personaje.hechizos}" class="bg-gray-700 rounded p-2 text-sm mb-2">
+                    <span th:text="${hechizo.nombre}" class="font-semibold text-yellow-300">Misil Mágico</span> 
                     (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
                     <br>
-                    <small th:text="${hechizo.descripcion}">Un proyectil mágico que causa daño.</small>
+                    <small th:text="${hechizo.descripcion}" class="text-gray-300">Un proyectil mágico que causa daño.</small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- toast notification container -->
+<div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300" role="status"></div>
 
 <script>
     function usarItem(id) {
@@ -62,6 +96,56 @@
     function equiparItem(id) {
     }
     function desequiparItem(id) {
+    }
+
+    function showToast(message, isSuccess=true) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.remove('bg-red-600','bg-green-600');
+        toast.classList.add(isSuccess ? 'bg-green-600' : 'bg-red-600');
+        toast.classList.add('opacity-100');
+        setTimeout(() => {
+            toast.classList.remove('opacity-100');
+        }, 2000); // show 2 seconds
+    }
+
+    function actualizarMoneda(personajeId, tipo) {
+        const input = document.getElementById(`mon_${tipo}_${personajeId}`);
+        if (!input) return;
+        let valor = parseInt(input.value, 10);
+        if (isNaN(valor) || valor < 0) valor = 0;
+
+        // construimos datos para envío tipo form-urlencoded
+        const body = new URLSearchParams();
+        body.append('tipo', tipo);
+        body.append('valor', valor);
+
+        fetch(`/personaje/${personajeId}/moneda`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al actualizar');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const nuevoValor = data[tipo];
+            if (nuevoValor !== undefined && nuevoValor !== null) {
+                input.value = nuevoValor;
+                showToast('Cantidad actualizada', true);
+            } else {
+                throw new Error('Respuesta inesperada del servidor');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Error al actualizar', false);
+        });
     }
 </script>
 
