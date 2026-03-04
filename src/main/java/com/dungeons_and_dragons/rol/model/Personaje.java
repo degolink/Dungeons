@@ -6,8 +6,8 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,8 +45,18 @@ public class Personaje {
     private int puntosVida;
     private int puntosVidaMax;
     private int puntosEnergia;
-    @Embedded
-                private Monedero monedero;
+
+    @Column(nullable = false)
+    private Integer cobre = 0;
+
+    @Column(nullable = false)
+    private Integer plata = 0;
+
+    @Column(nullable = false)
+    private Integer oro = 0;
+
+    @Column(nullable = false)
+    private Integer platino = 0;
 
     // --- Historia ---
     @Column(length = 1000)
@@ -88,6 +98,6 @@ public class Personaje {
     private List<Condicion> condiciones = new ArrayList<>();
 
 
- 
-    
+    @OneToMany(mappedBy = "personaje", fetch = FetchType.LAZY)
+    private List<ItemInventario> inventario;
 }

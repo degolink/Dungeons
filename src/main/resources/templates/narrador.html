@@ -23,10 +23,10 @@
 
                 <p>
                     Monedas: 
-                    <span th:text="${personaje.monedero.cobre}">10</span> C, 
-                    <span th:text="${personaje.monedero.plata}">5</span> P, 
-                    <span th:text="${personaje.monedero.oro}">20</span> O, 
-                    <span th:text="${personaje.monedero.platino}">0</span> Platino
+                    <span th:text="${personaje.cobre} ?: 0"></span> C, 
+                    <span th:text="${personaje.plata} ?: 0"></span> P, 
+                    <span th:text="${personaje.oro} ?: 0"></span> O, 
+                    <span th:text="${personaje.platino} ?: 0"></span> Platino
                 </p>
 
                 <p>Estados Alterados:</p>
@@ -42,12 +42,12 @@
                     <button class="btn btn-sm btn-success" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
                     <button class="btn btn-sm btn-primary" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
                     <button class="btn btn-sm btn-warning" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
-                </div>
+                </div> 
 
                 <p>Hechizos:</p>
                 <div th:each="hechizo : ${personaje.hechizos}" class="hechizo">
                     <span th:text="${hechizo.nombre}">Misil Mágico</span> 
-                    (Nivel <span th:text="${hechizo.nivel}">1</span>) - <span th:text="${hechizo.clase}">Mago</span>
+                    (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
                     <br>
                     <small th:text="${hechizo.descripcion}">Un proyectil mágico que causa daño.</small>
                 </div>
@@ -58,13 +58,10 @@
 
 <script>
     function usarItem(id) {
-        fetch('/api/iteminventario/usar/' + id, { method: 'POST' }).then(() => location.reload());
     }
     function equiparItem(id) {
-        fetch('/api/iteminventario/equipar/' + id, { method: 'POST' }).then(() => location.reload());
     }
     function desequiparItem(id) {
-        fetch('/api/iteminventario/desequipar/' + id, { method: 'POST' }).then(() => location.reload());
     }
 </script>
 
