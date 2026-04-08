@@ -16,7 +16,7 @@
 
 <div class="flex flex-wrap justify-center gap-4 mx-auto max-w-7xl">
     <div class="w-full md:w-5/6 lg:w-4/5 px-2" th:each="personaje : ${personajes}">
-        <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" style="border-color: #444; box-shadow: 0 0 10px #000;">
+        <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" th:id="${'personaje_card_' + personaje.id}" style="border-color: #444; box-shadow: 0 0 10px #000;">
             <div class="mb-3 relative">
                 <span class="text-xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</span>
                 <span class="text-sm text-gray-400">(Nivel <span th:text="${personaje.nivel}">4</span> 
@@ -24,11 +24,32 @@
                 <button class="absolute top-0 right-0 text-red-500 hover:text-red-400 text-xs" th:onclick="'eliminarPersonaje(' + ${personaje.id} + ')'">✖</button>
             </div>
             <div class="space-y-2 text-gray-200">
-                <!-- Estadísticas -->
-                <div class="pb-3 border-b border-gray-600">
+                         <!-- Estadísticas -->
+                        <div class="pb-3 border-b border-gray-600">
                     <p class="text-yellow-300 font-bold mb-2">Estadísticas</p>
-                    <p>HP: <span class="font-bold text-yellow-400" style="text-shadow: 0 0 3px #ffc107;" th:text="${personaje.puntosVida}">30</span>/<span th:text="${personaje.puntosVidaMax}">40</span></p>
-                </div>
+                        <p>
+                            HP: 
+                        <span class="font-bold text-yellow-400" style="text-shadow: 0 0 3px #ffc107;" th:text="${personaje.puntosVida}">30</span>
+                        /
+                        <span th:text="${personaje.puntosVidaMax}">40</span>
+                    </p>
+
+                    <p>
+                        PE:
+                        <span class="font-bold text-fuchsia-300" th:id="${'energia_' + personaje.id}" th:text="${personaje.puntosEnergia}">0</span>
+                    </p>
+
+                    <p class="mt-2">
+                        Iniciativa: 
+                        <span class="font-bold text-cyan-400" th:id="${'ini_' + personaje.id}">-</span>
+                    </p>
+
+          <button
+                    class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                    th:onclick="'tirarIniciativa(' + ${personaje.id} + ')'">
+                    Tirar iniciativa
+                </button>
+                </div>  
 
                 <!-- Monedas -->
                 <div class="pb-3 border-b border-gray-600">
@@ -71,37 +92,122 @@
                 <!-- Estados Alterados -->
                 <div class="pb-3 border-b border-gray-600">
                     <p class="text-yellow-300 font-bold mb-2">Estados Alterados</p>
-                    <ul class="list-disc list-inside">
-                    <li th:each="condicion : ${personaje.condiciones}" th:text="${condicion.nombre}">Aturdido</li>
+                    <ul class="space-y-2" th:id="${'condiciones_' + personaje.id}">
+                        <li th:each="condicion : ${personaje.condiciones}"
+                            th:id="${'condicion_' + condicion.id}"
+                            class="flex items-start justify-between gap-2 bg-gray-700 rounded p-2 text-sm">
+                            <div>
+                                <span th:text="${condicion.nombre}" class="font-semibold text-yellow-200">Aturdido</span>
+                                <span th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ' turnos)'}" class="text-xs text-cyan-300"></span>
+                                <div th:if="${condicion.descripcion != null and !#strings.isEmpty(condicion.descripcion)}"
+                                     th:text="${condicion.descripcion}" class="text-xs text-gray-300 mt-1">Pierde el turno.</div>
+                            </div>
+                            <button class="text-red-400 hover:text-red-300 text-xs"
+                                    th:onclick="'eliminarCondicion(' + ${personaje.id} + ',' + ${condicion.id} + ')'">Quitar</button>
+                        </li>
                     </ul>
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <input type="text" placeholder="Nueva condición"
+                               th:id="${'cond_nombre_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="0" placeholder="Duración"
+                               th:id="${'cond_duracion_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="text" placeholder="Descripción"
+                               th:id="${'cond_desc_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                    </div>
+                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                            th:onclick="'agregarCondicion(' + ${personaje.id} + ')'">Añadir condición</button>
                 </div>
 
                 <!-- Inventario -->
                 <div class="pb-3 border-b border-gray-600">
                     <p class="text-yellow-300 font-bold mb-2">Inventario</p>
-                    <div th:each="item : ${personaje.inventario}" class="flex justify-between items-center py-1 text-sm">
-                        <div class="flex-1">
-                            <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
-                            <span class="mx-2">x<span th:text="${item.cantidad}">1</span></span>
-                            <span th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
-                        </div>
-                        <div class="flex gap-1">
-                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'" >Usar</button>
-                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'" >Equipar</button>
-                            <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'" >Desequipar</button>
+                    <div th:id="${'inventario_' + personaje.id}">
+                        <div th:each="item : ${personaje.inventario}" th:id="${'item_' + item.id}" class="flex justify-between items-center py-1 text-sm">
+                            <div class="flex-1">
+                                <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
+                                <span class="mx-2">x<span th:id="${'item_cantidad_' + item.id}" th:text="${item.cantidad}">1</span></span>
+                                <span th:id="${'item_estado_' + item.id}" th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'" >Usar</button>
+                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'" >Equipar</button>
+                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'" >Desequipar</button>
+                                <button class="bg-red-900 hover:bg-red-800 text-white text-xs py-1 px-2 rounded" th:onclick="'eliminarItem(' + ${item.id} + ')'" >Eliminar</button>
+                            </div>
                         </div>
                     </div>
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input type="text" placeholder="Nombre del ítem"
+                               th:id="${'item_nombre_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="text" placeholder="Tipo"
+                               th:id="${'item_tipo_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="1" placeholder="Cantidad"
+                               th:id="${'item_cantidad_input_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="text" placeholder="Descripción"
+                               th:id="${'item_descripcion_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <label class="flex items-center gap-2 text-xs text-gray-200">
+                            <input type="checkbox" th:id="${'item_apilable_' + personaje.id}" class="bg-gray-600" />
+                            Apilable
+                        </label>
+                        <label class="flex items-center gap-2 text-xs text-gray-200">
+                            <input type="checkbox" th:id="${'item_magico_' + personaje.id}" class="bg-gray-600" />
+                            Mágico
+                        </label>
+                    </div>
+                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                            th:onclick="'agregarItemInventario(' + ${personaje.id} + ')'">Añadir ítem</button>
                 </div>
 
                 <!-- Hechizos -->
                 <div>
                     <p class="text-yellow-300 font-bold mb-2">Hechizos</p>
-                <div th:each="hechizo : ${personaje.hechizos}" class="bg-gray-700 rounded p-2 text-sm mb-2">
-                    <span th:text="${hechizo.nombre}" class="font-semibold text-yellow-300">Misil Mágico</span> 
-                    (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
-                    <br>
-                    <small th:text="${hechizo.descripcion}" class="text-gray-300">Un proyectil mágico que causa daño.</small>
-                </div>
+                    <div th:id="${'hechizos_' + personaje.id}">
+                        <div th:each="hechizo : ${personaje.hechizos}" th:id="${'spell_' + hechizo.id}" class="bg-gray-700 rounded p-2 text-sm mb-2">
+                            <span th:text="${hechizo.nombre}" class="font-semibold text-yellow-300">Misil Mágico</span>
+                            (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
+                            <br>
+                            <small th:text="${hechizo.descripcion}" class="text-gray-300">Un proyectil mágico que causa daño.</small>
+                            <div class="mt-2 flex items-center justify-between gap-2">
+                                <span class="text-xs text-fuchsia-300">Coste estimado: <span th:text="${hechizo.nivel > 0 ? hechizo.nivel : 1}">1</span> PE</span>
+                                <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                                        th:onclick="'lanzarHechizo(' + ${personaje.id} + ',' + ${hechizo.id} + ')'">Lanzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input type="text" placeholder="Nombre del hechizo"
+                               th:id="${'spell_nombre_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="text" placeholder="Tipo"
+                               th:id="${'spell_tipo_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="0" placeholder="Nivel"
+                               th:id="${'spell_nivel_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="0" placeholder="Daño"
+                               th:id="${'spell_danio_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="0" placeholder="Duración"
+                               th:id="${'spell_duracion_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <label class="flex items-center gap-2 text-xs text-gray-200">
+                            <input type="checkbox" th:id="${'spell_concentracion_' + personaje.id}" class="bg-gray-600" />
+                            Requiere concentración
+                        </label>
+                    </div>
+                    <textarea placeholder="Descripción"
+                              th:id="${'spell_descripcion_' + personaje.id}"
+                              rows="2"
+                              class="mt-2 w-full px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs"></textarea>
+                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                            th:onclick="'agregarHechizo(' + ${personaje.id} + ')'">Añadir hechizo</button>
                 </div>
             </div>
         </div>
@@ -225,36 +331,373 @@
 
 <script>
     function usarItem(id) {
+        ejecutarAccionInventario(id, 'usar', 'Ítem usado correctamente');
     }
+
     function equiparItem(id) {
+        ejecutarAccionInventario(id, 'equipar', 'Ítem equipado');
     }
+
     function desequiparItem(id) {
+        ejecutarAccionInventario(id, 'desequipar', 'Ítem desequipado');
     }
+
+    function eliminarItem(id) {
+        fetch(`/inventario/${id}`, {
+            method: 'DELETE'
+        })
+        .then(async resp => {
+            if (!resp.ok) {
+                const error = await resp.json().catch(() => null);
+                throw new Error(error?.message || 'Error al eliminar el ítem');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            document.getElementById(`item_${id}`)?.remove();
+            showToast(`Ítem eliminado: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(err.message || 'Error al eliminar el ítem', false);
+        });
+    }
+
+    function ejecutarAccionInventario(id, accion, mensajeExito) {
+        fetch(`/inventario/${id}/${accion}`, {
+            method: 'POST'
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error(`Error al ${accion} el ítem`);
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const cantidad = document.getElementById(`item_cantidad_${id}`);
+            const estado = document.getElementById(`item_estado_${id}`);
+            const bloque = document.getElementById(`item_${id}`);
+
+            if (cantidad) {
+                cantidad.textContent = data.cantidad;
+            }
+            if (estado) {
+                estado.textContent = data.consumido ? 'Consumido' : (data.equipado ? 'Equipado' : '');
+            }
+            if (bloque && data.consumido && Number(data.cantidad) <= 0) {
+                bloque.remove();
+            }
+            showToast(`${mensajeExito}: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(`Error al ${accion} el ítem`, false);
+        });
+    }
+
+    function agregarItemInventario(personajeId) {
+        const nombreInput = document.getElementById(`item_nombre_${personajeId}`);
+        const tipoInput = document.getElementById(`item_tipo_${personajeId}`);
+        const cantidadInput = document.getElementById(`item_cantidad_input_${personajeId}`);
+        const descripcionInput = document.getElementById(`item_descripcion_${personajeId}`);
+        const apilableInput = document.getElementById(`item_apilable_${personajeId}`);
+        const magicoInput = document.getElementById(`item_magico_${personajeId}`);
+
+        if (!nombreInput || !nombreInput.value.trim()) {
+            showToast('Debes indicar un nombre para el ítem', false);
+            return;
+        }
+
+        const body = new URLSearchParams();
+        body.append('nombre', nombreInput.value.trim());
+        body.append('tipo', tipoInput?.value?.trim() || 'miscelaneo');
+        body.append('cantidad', cantidadInput?.value || '1');
+        body.append('descripcion', descripcionInput?.value?.trim() || '');
+        body.append('apilable', apilableInput?.checked ? 'true' : 'false');
+        body.append('magico', magicoInput?.checked ? 'true' : 'false');
+
+        fetch(`/personaje/${personajeId}/inventario`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        })
+        .then(async resp => {
+            if (!resp.ok) {
+                const error = await resp.json().catch(() => null);
+                throw new Error(error?.message || 'Error al agregar ítem');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const lista = document.getElementById(`inventario_${personajeId}`);
+            if (lista) {
+                const fila = document.createElement('div');
+                fila.id = `item_${data.id}`;
+                fila.className = 'flex justify-between items-center py-1 text-sm';
+                fila.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-medium">${data.nombre}</span>
+                        <span class="mx-2">x<span id="item_cantidad_${data.id}">${data.cantidad}</span></span>
+                        <span id="item_estado_${data.id}" class="text-xs text-green-400"></span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" onclick="usarItem(${data.id})">Usar</button>
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" onclick="equiparItem(${data.id})">Equipar</button>
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" onclick="desequiparItem(${data.id})">Desequipar</button>
+                        <button class="bg-red-900 hover:bg-red-800 text-white text-xs py-1 px-2 rounded" onclick="eliminarItem(${data.id})">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(fila);
+            }
+
+            nombreInput.value = '';
+            if (tipoInput) tipoInput.value = '';
+            if (cantidadInput) cantidadInput.value = '';
+            if (descripcionInput) descripcionInput.value = '';
+            if (apilableInput) apilableInput.checked = false;
+            if (magicoInput) magicoInput.checked = false;
+            showToast(`Ítem añadido: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(err.message || 'Error al agregar ítem', false);
+        });
+    }
+
+    function agregarCondicion(personajeId) {
+        const nombreInput = document.getElementById(`cond_nombre_${personajeId}`);
+        const descripcionInput = document.getElementById(`cond_desc_${personajeId}`);
+        const duracionInput = document.getElementById(`cond_duracion_${personajeId}`);
+
+        if (!nombreInput || !nombreInput.value.trim()) {
+            showToast('Debes indicar un nombre para la condición', false);
+            return;
+        }
+
+        const body = new URLSearchParams();
+        body.append('nombre', nombreInput.value.trim());
+        body.append('descripcion', descripcionInput?.value?.trim() || '');
+        body.append('duracion', duracionInput?.value || '0');
+
+        fetch(`/personaje/${personajeId}/condiciones`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al agregar condición');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const lista = document.getElementById(`condiciones_${personajeId}`);
+            if (lista) {
+                const item = document.createElement('li');
+                item.id = `condicion_${data.id}`;
+                item.className = 'flex items-start justify-between gap-2 bg-gray-700 rounded p-2 text-sm';
+                const duracion = Number(data.duracion) > 0 ? ` (${data.duracion} turnos)` : '';
+                const descripcion = data.descripcion ? `<div class="text-xs text-gray-300 mt-1">${data.descripcion}</div>` : '';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-semibold text-yellow-200">${data.nombre}</span>
+                        <span class="text-xs text-cyan-300">${duracion}</span>
+                        ${descripcion}
+                    </div>
+                    <button class="text-red-400 hover:text-red-300 text-xs" onclick="eliminarCondicion(${personajeId}, ${data.id})">Quitar</button>
+                `;
+                lista.appendChild(item);
+            }
+
+            nombreInput.value = '';
+            if (descripcionInput) descripcionInput.value = '';
+            if (duracionInput) duracionInput.value = '';
+            showToast(`Condición añadida: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Error al agregar condición', false);
+        });
+    }
+
+    function eliminarCondicion(personajeId, condicionId) {
+        fetch(`/personaje/${personajeId}/condiciones/${condicionId}`, {
+            method: 'DELETE'
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al eliminar condición');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            document.getElementById(`condicion_${condicionId}`)?.remove();
+            showToast(`Condición eliminada: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Error al eliminar condición', false);
+        });
+    }
+
     function openDrawer() {
         document.getElementById('drawer').classList.remove('hidden');
     }
+
     function closeDrawer() {
         document.getElementById('drawer').classList.add('hidden');
     }
+
     function eliminarPersonaje(id) {
         if (!confirm('¿Eliminar este personaje?')) return;
         fetch(`/personaje/${id}`, { method: 'DELETE' })
             .then(resp => {
-                if (resp.ok) location.reload();
-                else throw new Error();
+                if (!resp.ok) {
+                    throw new Error();
+                }
+                document.getElementById(`personaje_card_${id}`)?.remove();
+                showToast('Personaje eliminado', true);
             })
             .catch(() => showToast('Error al eliminar', false));
     }
 
-    function showToast(message, isSuccess=true) {
+    function showToast(message, isSuccess = true) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
-        toast.classList.remove('bg-red-600','bg-green-600');
+        toast.classList.remove('bg-red-600', 'bg-green-600');
         toast.classList.add(isSuccess ? 'bg-green-600' : 'bg-red-600');
         toast.classList.add('opacity-100');
         setTimeout(() => {
             toast.classList.remove('opacity-100');
-        }, 2000); // show 2 seconds
+        }, 2000);
+    }
+
+    function tirarIniciativa(personajeId) {
+        fetch(`/personaje/${personajeId}/iniciativa`, {
+            method: 'POST'
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al tirar iniciativa');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const span = document.getElementById(`ini_${personajeId}`);
+            if (span) {
+                span.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+            }
+            showToast(`Iniciativa de ${data.nombrePersonaje}: ${data.total}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Error al tirar iniciativa', false);
+        });
+    }
+
+    function agregarHechizo(personajeId) {
+        const nombreInput = document.getElementById(`spell_nombre_${personajeId}`);
+        const tipoInput = document.getElementById(`spell_tipo_${personajeId}`);
+        const nivelInput = document.getElementById(`spell_nivel_${personajeId}`);
+        const danioInput = document.getElementById(`spell_danio_${personajeId}`);
+        const duracionInput = document.getElementById(`spell_duracion_${personajeId}`);
+        const descripcionInput = document.getElementById(`spell_descripcion_${personajeId}`);
+        const concentracionInput = document.getElementById(`spell_concentracion_${personajeId}`);
+
+        if (!nombreInput || !nombreInput.value.trim()) {
+            showToast('Debes indicar un nombre para el hechizo', false);
+            return;
+        }
+
+        const body = new URLSearchParams();
+        body.append('nombre', nombreInput.value.trim());
+        body.append('tipo', tipoInput?.value?.trim() || 'utilidad');
+        body.append('nivel', nivelInput?.value || '1');
+        body.append('danio', danioInput?.value || '0');
+        body.append('duracion', duracionInput?.value || '0');
+        body.append('descripcion', descripcionInput?.value?.trim() || '');
+        body.append('requiereConcentracion', concentracionInput?.checked ? 'true' : 'false');
+
+        fetch(`/personaje/${personajeId}/hechizos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        })
+        .then(async resp => {
+            if (!resp.ok) {
+                const error = await resp.json().catch(() => null);
+                throw new Error(error?.message || 'Error al agregar hechizo');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const lista = document.getElementById(`hechizos_${personajeId}`);
+            if (lista) {
+                const card = document.createElement('div');
+                card.id = `spell_${data.id}`;
+                card.className = 'bg-gray-700 rounded p-2 text-sm mb-2';
+                const coste = Math.max(Number(data.nivel) || 0, 1);
+                const descripcion = data.descripcion || 'Sin descripción';
+                card.innerHTML = `
+                    <span class="font-semibold text-yellow-300">${data.nombre}</span>
+                    (Nivel ${data.nivel}) - ${data.tipo}
+                    <br>
+                    <small class="text-gray-300">${descripcion}</small>
+                    <div class="mt-2 flex items-center justify-between gap-2">
+                        <span class="text-xs text-fuchsia-300">Coste estimado: ${coste} PE</span>
+                        <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded" onclick="lanzarHechizo(${personajeId}, ${data.id})">Lanzar</button>
+                    </div>
+                `;
+                lista.appendChild(card);
+            }
+
+            nombreInput.value = '';
+            if (tipoInput) tipoInput.value = '';
+            if (nivelInput) nivelInput.value = '';
+            if (danioInput) danioInput.value = '';
+            if (duracionInput) duracionInput.value = '';
+            if (descripcionInput) descripcionInput.value = '';
+            if (concentracionInput) concentracionInput.checked = false;
+            showToast(`Hechizo añadido: ${data.nombre}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(err.message || 'Error al agregar hechizo', false);
+        });
+    }
+
+    function lanzarHechizo(personajeId, hechizoId) {
+        fetch(`/personaje/${personajeId}/hechizos/${hechizoId}/lanzar`, {
+            method: 'POST'
+        })
+        .then(async resp => {
+            if (!resp.ok) {
+                const error = await resp.json().catch(() => null);
+                throw new Error(error?.message || 'Error al lanzar hechizo');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            const energia = document.getElementById(`energia_${personajeId}`);
+            if (energia) {
+                energia.textContent = data.energiaRestante;
+            }
+
+            const danio = data.danio ?? data['daño'] ?? 0;
+            const detalle = danio > 0 ? `Daño: ${danio}. ` : '';
+            const concentracion = data.requiereConcentracion ? ' Requiere concentración.' : '';
+            showToast(`${data.nombre}: ${detalle}PE restante ${data.energiaRestante}.${concentracion}`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(err.message || 'Error al lanzar hechizo', false);
+        });
     }
 
     function actualizarMoneda(personajeId, tipo) {
@@ -263,7 +706,6 @@
         let valor = parseInt(input.value, 10);
         if (isNaN(valor) || valor < 0) valor = 0;
 
-        // construimos datos para envío tipo form-urlencoded
         const body = new URLSearchParams();
         body.append('tipo', tipo);
         body.append('valor', valor);
@@ -296,6 +738,7 @@
         });
     }
 </script>
+
 
 </body>
 </html>
