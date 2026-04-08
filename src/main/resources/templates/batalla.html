@@ -15,30 +15,32 @@
                     <h2 class="text-lg font-bold text-yellow-300">🧙 Personajes</h2>
                     <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20" th:text="${#lists.size(batalla.personajes)} + ' activos'">0 activos</span>
                 </div>
-                <div class="space-y-3">
+                <div id="listaPersonajes" class="flex flex-col gap-3">
                     <div th:each="personaje : ${batalla.personajes}" class="rounded-2xl border p-3 shadow-md transition-all"
+                         th:attr="data-combatiente='true',data-orden=${personaje.ordenTurno},data-nombre=${personaje.nombre},data-tipo='Héroe',data-turno=${personaje.turnoActual}"
+                         th:style="'order:' + ${personaje.ordenTurno}"
                          th:classappend="${personaje.turnoActual} ? ' border-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-300/30' : ' border-slate-700 bg-slate-900/70'">
-                        <div class="flex items-start justify-between gap-2 mb-2">
-                            <div class="flex items-center gap-3">
-                                <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-20 h-20 rounded-xl border-cyan-400/30')}"></th:block>
-                                <p class="font-semibold text-cyan-300" th:text="${personaje.nombre}">Personaje</p>
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="shrink-0 w-36 h-36 md:w-36 md:h-36 overflow-hidden rounded-lg border border-cyan-400/20 shadow-md shadow-cyan-950/20 bg-transparent flex items-center justify-center">
+                                    <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-full h-full rounded-none border-0 shadow-none object-cover object-center scale-110')} "></th:block>
+                                </div>
+                                <p class="font-semibold text-cyan-300 break-words" th:text="${personaje.nombre}">Personaje</p>
                             </div>
-                            <span class="text-[11px] px-2 py-1 rounded-full border"
-                                  th:classappend="${personaje.turnoActual} ? ' border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'"
-                                  th:text="${personaje.turnoActual} ? 'En turno' : 'En espera'">En espera</span>
+                            <div class="self-start shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border"
+                                 th:classappend="${personaje.turnoActual} ? ' border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'">
+                                <span th:text="${personaje.turnoActual} ? 'Turno' : 'Orden'">Orden</span>
+                                <span class="font-semibold">#<span th:text="${personaje.ordenTurno} ?: 0">0</span></span>
+                            </div>
                         </div>
                         <p class="text-sm">HP: <span class="font-semibold text-emerald-300" th:id="${'vida_personaje_' + personaje.id}" th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
                         <p class="text-sm">PE: <span class="font-semibold text-sky-300" th:text="${personaje.puntosEnergia}">0</span></p>
-                        <p class="text-xs text-slate-300 mt-1">Iniciativa: <span th:text="${personaje.iniciativaActual}">0</span> · Orden: <span th:text="${personaje.ordenTurno}">0</span></p>
+                        <p class="text-xs text-slate-300 mt-1">Iniciativa: <span th:text="${personaje.iniciativaActual}">0</span> · Orden de turno: <span class="text-cyan-300 font-semibold" th:text="${'#' + personaje.ordenTurno}">#0</span></p>
                         <p class="text-xs text-rose-300 mt-1" th:if="${personaje.derrotado}">☠️ Derrotado</p>
-                        <div class="mt-3 flex flex-col gap-2">
-                            <select th:id="${'objetivo_villano_' + personaje.id}" class="text-xs px-2 py-2 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">
-                                <option th:each="villano : ${batalla.villanos}" th:if="${!villano.derrotado}" th:value="${villano.id}" th:text="${villano.nombre}">Villano</option>
-                            </select>
-                            <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-2 rounded-lg transition"
-                                    th:disabled="${!personaje.turnoActual or personaje.derrotado}"
-                                    th:onclick="'atacar(' + ${batalla.id} + ',\'personaje\',' + ${personaje.id} + ',\'objetivo_villano_' + ${personaje.id} + '\',\'villano\')'">Atacar</button>
-                        </div>
+                        <a th:href="@{'/jugador/' + ${personaje.id}}"
+                           class="inline-block mt-3 bg-cyan-700 hover:bg-cyan-600 text-white text-xs py-2 px-3 rounded-lg transition">
+                            Abrir vista del jugador
+                        </a>
                     </div>
                 </div>
             </section>
@@ -63,7 +65,7 @@
                     </div>
 
                     <p class="text-sm text-slate-300 mt-4 max-w-2xl mx-auto">
-                        El corazón del combate está en la arena: prepara los turnos, elige objetivos y deja que el choque entre héroes y villanos tome el protagonismo.
+                        El corazón del combate está en la arena: prepara los turnos y abre la vista de cada jugador para ejecutar sus acciones.
                     </p>
 
                     <div class="flex flex-wrap justify-center gap-3 mt-5">
@@ -71,6 +73,16 @@
                         <button class="bg-amber-700 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-sm shadow-md transition" th:onclick="'reiniciarBatalla(' + ${batalla.id} + ')'">🔄 Reiniciar batalla</button>
                         <button class="bg-indigo-700 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm shadow-md transition" th:onclick="'siguienteTurno(' + ${batalla.id} + ')'">⏭️ Siguiente turno</button>
                         <a href="/narrador" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm shadow-md transition">↩️ Volver al narrador</a>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-cyan-400/20 bg-slate-950/70 p-4 shadow-lg">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <h2 class="text-sm font-bold text-cyan-300">🎯 Orden de iniciativa</h2>
+                        <span class="text-[11px] text-slate-400">Debajo del panel principal</span>
+                    </div>
+                    <div id="ordenIniciativa" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <p class="text-slate-400 col-span-full">Tira iniciativa para ver el orden de turnos.</p>
                     </div>
                 </div>
 
@@ -90,29 +102,54 @@
                     <h2 class="text-lg font-bold text-red-300">👹 Villanos</h2>
                     <span class="text-xs px-2 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-400/20" th:text="${#lists.size(batalla.villanos)} + ' amenazas'">0 amenazas</span>
                 </div>
-                <div class="space-y-3">
+                <div id="listaVillanos" class="flex flex-col gap-3">
                     <div th:each="villano : ${batalla.villanos}" class="rounded-2xl border p-3 shadow-md transition-all"
+                         th:attr="data-combatiente='true',data-orden=${villano.ordenTurno},data-nombre=${villano.nombre},data-tipo='Villano',data-turno=${villano.turnoActual}"
+                         th:style="'order:' + ${villano.ordenTurno}"
                          th:classappend="${villano.turnoActual} ? ' border-rose-400 bg-rose-500/10 ring-1 ring-rose-300/30' : ' border-slate-700 bg-slate-900/70'">
-                        <div class="flex items-start justify-between gap-2 mb-2">
-                            <div>
-                                <p class="font-semibold text-rose-300" th:text="${villano.nombre}">Villano</p>
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-rose-300 break-words" th:text="${villano.nombre}">Villano</p>
                                 <p class="text-xs text-slate-300" th:text="${villano.tipo}">Tipo</p>
-                                <a th:href="@{'/villano/' + ${villano.id}}" class="text-[11px] text-cyan-300 hover:text-cyan-200 underline mt-1 inline-block">Abrir vista</a>
                             </div>
-                            <span class="text-[11px] px-2 py-1 rounded-full border"
-                                  th:classappend="${villano.turnoActual} ? ' border-rose-400/40 text-rose-300 bg-rose-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'"
-                                  th:text="${villano.turnoActual} ? 'En turno' : 'En espera'">En espera</span>
+                            <div class="self-start shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border"
+                                 th:classappend="${villano.turnoActual} ? ' border-rose-400/40 text-rose-300 bg-rose-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'">
+                                <span th:text="${villano.turnoActual} ? 'Turno' : 'Orden'">Orden</span>
+                                <span class="font-semibold">#<span th:text="${villano.ordenTurno} ?: 0">0</span></span>
+                            </div>
                         </div>
                         <p class="text-sm">HP: <span class="font-semibold text-rose-300" th:id="${'vida_villano_' + villano.id}" th:text="${villano.puntosVida}">0</span> / <span th:text="${villano.puntosVidaMax}">0</span></p>
-                        <p class="text-xs text-slate-300 mt-1">Iniciativa: <span th:text="${villano.iniciativaActual}">0</span> · Orden: <span th:text="${villano.ordenTurno}">0</span></p>
+                        <p class="text-xs text-slate-300 mt-1">Iniciativa: <span th:text="${villano.iniciativaActual}">0</span> · Orden de turno: <span class="text-fuchsia-300 font-semibold" th:text="${'#' + villano.ordenTurno}">#0</span></p>
                         <p class="text-xs text-rose-300 mt-1" th:if="${villano.derrotado}">☠️ Derrotado</p>
-                        <div class="mt-3 flex flex-col gap-2">
-                            <select th:id="${'objetivo_personaje_' + villano.id}" class="text-xs px-2 py-2 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">
-                                <option th:each="personaje : ${batalla.personajes}" th:if="${!personaje.derrotado}" th:value="${personaje.id}" th:text="${personaje.nombre}">Personaje</option>
-                            </select>
-                            <button class="bg-rose-700 hover:bg-rose-600 text-white text-xs py-2 px-2 rounded-lg transition"
+
+                        <select th:id="${'objetivo_personaje_' + villano.id}"
+                                class="mt-3 w-full text-xs px-2 py-2 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">
+                            <option value="">Selecciona un personaje</option>
+                            <option th:each="personaje : ${batalla.personajes}"
+                                    th:if="${!personaje.derrotado}"
+                                    th:value="${personaje.id}"
+                                    th:text="${personaje.nombre}">Personaje</option>
+                        </select>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a th:href="@{'/villano/' + ${villano.id}}"
+                               class="inline-block bg-rose-700 hover:bg-rose-600 text-white text-xs py-2 px-3 rounded-lg transition">
+                                Abrir vista
+                            </a>
+                            <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded-lg transition"
                                     th:disabled="${!villano.turnoActual or villano.derrotado}"
-                                    th:onclick="'atacar(' + ${batalla.id} + ',\'villano\',' + ${villano.id} + ',\'objetivo_personaje_' + ${villano.id} + '\',\'personaje\')'">Atacar</button>
+                                    th:onclick="'atacarVillanoDesdeBatalla(' + ${villano.id} + ',\'objetivo_personaje_' + ${villano.id} + '\')'">
+                                Atacar
+                            </button>
+                            <a th:href="@{'/villano/' + ${villano.id} + '#hechizosVillano'}"
+                               class="inline-block bg-purple-700 hover:bg-purple-600 text-white text-xs py-2 px-3 rounded-lg transition">
+                                Hechizos
+                            </a>
+                            <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-2 px-3 rounded-lg transition"
+                                    th:disabled="${!villano.turnoActual or villano.derrotado}"
+                                    th:onclick="'finalizarTurnoVillanoDesdeBatalla(' + ${villano.id} + ')'">
+                                Finalizar turno
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -125,6 +162,53 @@
 <th:block th:replace="~{fragments/layout :: commonScripts()}"></th:block>
 
 <script>
+
+    function renderOrdenIniciativa() {
+        const contenedor = document.getElementById('ordenIniciativa');
+        if (!contenedor) return;
+
+        const combatientes = Array.from(document.querySelectorAll('[data-combatiente="true"]'))
+            .map(el => ({
+                nombre: el.dataset.nombre || 'Combatiente',
+                tipo: el.dataset.tipo || '',
+                orden: Number(el.dataset.orden || 0),
+                turnoActual: el.dataset.turno === 'true'
+            }))
+            .sort((a, b) => {
+                const ordenA = a.orden > 0 ? a.orden : Number.MAX_SAFE_INTEGER;
+                const ordenB = b.orden > 0 ? b.orden : Number.MAX_SAFE_INTEGER;
+                return ordenA - ordenB || a.nombre.localeCompare(b.nombre);
+            });
+
+        if (!combatientes.length) {
+            contenedor.innerHTML = '<p class="text-slate-400 col-span-full">No hay combatientes cargados.</p>';
+            return;
+        }
+
+        const hayIniciativa = combatientes.some(item => item.orden > 0);
+
+        contenedor.innerHTML = combatientes.map(item => {
+            const etiquetaOrden = item.orden > 0 ? `#${item.orden}` : 'Sin orden';
+            const etiquetaTipo = item.turnoActual ? 'Turno actual' : item.tipo;
+            const clases = item.turnoActual
+                ? 'border-emerald-400 bg-emerald-500/10 text-emerald-200'
+                : 'border-slate-700 bg-slate-900/80 text-slate-200';
+            const colorTipo = item.turnoActual ? 'text-emerald-300' : 'text-cyan-300';
+
+            return `
+                <div class="rounded-xl border px-3 py-2 ${clases}">
+                    <p class="text-[11px] ${colorTipo}">${etiquetaTipo}</p>
+                    <p class="font-semibold">${etiquetaOrden} · ${item.nombre}</p>
+                </div>
+            `;
+        }).join('');
+
+        if (!hayIniciativa) {
+            contenedor.insertAdjacentHTML('beforeend', '<p class="text-slate-400 col-span-full text-xs">Pulsa <strong>Iniciar batalla</strong> para calcular el orden de iniciativa.</p>');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', renderOrdenIniciativa);
 
     function iniciarBatalla(batallaId) {
         fetch(`/batallas/${batallaId}/iniciar`, { method: 'POST' })
@@ -159,44 +243,79 @@
             .catch(err => showToast(err.message, false));
     }
 
-    function atacar(batallaId, atacanteTipo, atacanteId, selectorId, objetivoTipo) {
+    function agregarEventoCombate(evento) {
+        const log = document.getElementById('logCombate');
+        if (!log || !evento) return;
+
+        const item = document.createElement('li');
+        item.className = 'bg-slate-900/70 border border-slate-700 rounded-xl p-3';
+        item.textContent = evento;
+        log.prepend(item);
+    }
+
+    function actualizarEstadoDesdeVillano(data) {
+        if (!data) return;
+
+        if (data.objetivoTipo && data.objetivoId !== undefined) {
+            const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
+            if (vida && data.vidaRestante !== undefined) {
+                vida.textContent = data.vidaRestante;
+            }
+        }
+
+        if (data.rondaActual !== undefined) {
+            const ronda = document.getElementById('ronda');
+            if (ronda) ronda.textContent = data.rondaActual;
+        }
+
+        agregarEventoCombate(data.evento || data.mensaje);
+    }
+
+    function atacarVillanoDesdeBatalla(villanoId, selectorId) {
         const selector = document.getElementById(selectorId);
         if (!selector || !selector.value) {
-            showToast('Selecciona un objetivo', false);
+            showToast('Selecciona un personaje objetivo', false);
             return;
         }
 
         const body = new URLSearchParams();
-        body.append('atacanteTipo', atacanteTipo);
-        body.append('atacanteId', atacanteId);
-        body.append('objetivoTipo', objetivoTipo);
         body.append('objetivoId', selector.value);
 
-        fetch(`/batallas/${batallaId}/atacar`, {
+        fetch(`/villano/${villanoId}/batalla/atacar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: body.toString()
         })
-        .then(resp => {
-            if (!resp.ok) throw new Error('No se pudo realizar el ataque');
-            return resp.json();
-        })
-        .then(data => {
-            const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
-            if (vida) {
-                vida.textContent = data.vidaRestante;
-            }
-            const log = document.getElementById('logCombate');
-            if (log) {
-                const item = document.createElement('li');
-                item.className = 'bg-slate-900/70 border border-slate-700 rounded-xl p-3';
-                item.textContent = data.evento;
-                log.prepend(item);
-            }
-            showToast(data.evento, true);
-        })
-        .catch(err => showToast(err.message, false));
+            .then(async resp => {
+                if (!resp.ok) {
+                    const error = await resp.json().catch(() => null);
+                    throw new Error(error?.message || 'No se pudo atacar');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                actualizarEstadoDesdeVillano(data);
+                showToast(data.evento || 'Ataque realizado', true);
+            })
+            .catch(err => showToast(err.message || 'No se pudo atacar', false));
     }
+
+    function finalizarTurnoVillanoDesdeBatalla(villanoId) {
+        fetch(`/villano/${villanoId}/batalla/turno/finalizar`, { method: 'POST' })
+            .then(async resp => {
+                if (!resp.ok) {
+                    const error = await resp.json().catch(() => null);
+                    throw new Error(error?.message || 'No se pudo finalizar el turno');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                showToast(data.mensaje || 'Turno finalizado', true);
+                location.reload();
+            })
+            .catch(err => showToast(err.message || 'No se pudo finalizar el turno', false));
+    }
+
 </script>
 
 </body>

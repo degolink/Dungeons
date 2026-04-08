@@ -11,7 +11,7 @@
     <div class="mb-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center gap-4">
-                <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-28 h-28 md:w-36 md:h-36 border-cyan-400/30 shadow-lg shadow-cyan-950/30')}"></th:block>
+                <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-auto max-w-full h-52 md:h-72 rounded-lg border-cyan-400/20 shadow-md shadow-cyan-950/20')}"></th:block>
                 <div>
                     <p class="text-xl text-yellow-300 font-bold" th:text="${personaje.nombre}">Nombre</p>
                     <p class="text-sm text-gray-300">
