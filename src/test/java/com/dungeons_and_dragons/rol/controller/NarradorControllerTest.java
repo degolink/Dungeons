@@ -13,7 +13,9 @@ import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+import org.springframework.ui.ConcurrentModel;
 
+import com.dungeons_and_dragons.rol.model.Batalla;
 import com.dungeons_and_dragons.rol.model.Condicion;
 import com.dungeons_and_dragons.rol.model.Hechizo;
 import com.dungeons_and_dragons.rol.model.ItemBase;
@@ -21,6 +23,7 @@ import com.dungeons_and_dragons.rol.model.ItemInventario;
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.repository.ItemBaseRepository;
 import com.dungeons_and_dragons.rol.repository.ItemInventarioRepository;
+import com.dungeons_and_dragons.rol.service.BatallaService;
 import com.dungeons_and_dragons.rol.service.DadosService;
 import com.dungeons_and_dragons.rol.service.PersonajeService;
 
@@ -38,12 +41,15 @@ class NarradorControllerTest {
     @Mock
     private ItemBaseRepository itemBaseRepository;
 
+    @Mock
+    private BatallaService batallaService;
+
     private NarradorController narradorController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        narradorController = new NarradorController(personajeService, dadosService, itemInventarioRepository, itemBaseRepository);
+        narradorController = new NarradorController(personajeService, dadosService, itemInventarioRepository, itemBaseRepository, batallaService);
     }
 
     @Test
@@ -212,5 +218,46 @@ class NarradorControllerTest {
         assertEquals(77L, response.get("id"));
         assertEquals("Poción", response.get("nombre"));
         assertEquals(2, response.get("cantidad"));
+    }
+
+    @Test
+    void deberiaMostrarVistaJugadorConPersonaje() {
+        Personaje personaje = new Personaje();
+        personaje.setId(1L);
+        personaje.setNombre("Lia");
+
+        Batalla batalla = new Batalla();
+        batalla.setId(10L);
+        batalla.setNombre("Asalto final");
+        batalla.setEstado("EN_CURSO");
+        batalla.getPersonajes().add(personaje);
+        personaje.setTurnoActual(true);
+
+        when(personajeService.buscarPorId(1L)).thenReturn(Optional.of(personaje));
+        when(batallaService.buscarActivaPorPersonaje(1L)).thenReturn(Optional.of(batalla));
+
+        ConcurrentModel model = new ConcurrentModel();
+        String vista = narradorController.mostrarVistaJugador(1L, model);
+
+        assertEquals("jugador", vista);
+        assertEquals(personaje, model.getAttribute("personaje"));
+        assertEquals(batalla, model.getAttribute("batallaActiva"));
+        assertEquals(true, model.getAttribute("esTurnoJugador"));
+    }
+
+    @Test
+    void deberiaAtacarDesdeLaVistaDelJugador() {
+        Map<String, Object> resultado = Map.of(
+                "evento", "Lia atacó a Goblin y causó 5 de daño.",
+                "vidaRestante", 7,
+                "objetivoId", 2L,
+                "objetivoTipo", "villano");
+
+        when(batallaService.atacarDesdeJugador(1L, 2L)).thenReturn(resultado);
+
+        Map<String, Object> response = narradorController.atacarDesdeJugador(1L, 2L);
+
+        assertEquals("Lia atacó a Goblin y causó 5 de daño.", response.get("evento"));
+        assertEquals(7, response.get("vidaRestante"));
     }
 }

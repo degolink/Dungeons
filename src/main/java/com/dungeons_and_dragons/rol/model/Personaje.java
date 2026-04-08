@@ -29,6 +29,7 @@ public class Personaje {
     private String clase;
     private String raza;
     private String alineamiento;
+    private String imagen;
 
     private int nivel;
     private int experiencia;
@@ -67,6 +68,13 @@ public class Personaje {
 
     private boolean activo = true;
 
+    // --- Estado de batalla ---
+    private Integer iniciativaActual = 0;
+    private boolean enBatalla = false;
+    private boolean turnoActual = false;
+    private boolean derrotado = false;
+    private Integer ordenTurno = 0;
+
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;
 
@@ -99,5 +107,5 @@ public class Personaje {
 
 
     @OneToMany(mappedBy = "personaje", fetch = FetchType.LAZY)
-    private List<ItemInventario> inventario;
+    private List<ItemInventario> inventario = new ArrayList<>();
 }

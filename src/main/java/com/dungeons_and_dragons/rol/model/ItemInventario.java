@@ -33,8 +33,12 @@ public class ItemInventario {
 
     // Relación con el personaje que lo posee
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "personaje_id", nullable = false)
+    @JoinColumn(name = "personaje_id")
     private Personaje personaje;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "villano_id")
+    private Villano villano;
 
     // Calcula el peso total de este ítem según la cantidad
     public double getPesoTotal() {

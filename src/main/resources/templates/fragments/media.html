@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <img th:fragment="heroPortrait(imagePath, altText, extraClasses)"
+         th:src="${imagePath != null and !#strings.isEmpty(imagePath) ? imagePath : '/img/batalla.gif'}"
+         th:alt="${altText}"
+         class="object-contain rounded-2xl border bg-transparent mix-blend-lighten"
+         th:classappend="${extraClasses}" />
+</body>
+</html>

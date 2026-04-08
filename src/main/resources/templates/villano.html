@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Vista del Villano')}"></head>
+<body class="bg-gradient-to-br from-zinc-950 via-slate-950 to-black min-h-screen text-gray-100 p-4">
+
+<h1 class="text-2xl md:text-4xl text-center text-rose-300 mt-6 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 6px #fb7185;">
+    Vista del Villano
+</h1>
+
+<div class="max-w-5xl mx-auto bg-slate-900 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${villano != null}">
+    <div class="mb-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+                <p class="text-xl text-rose-300 font-bold" th:text="${villano.nombre}">Nombre</p>
+                <p class="text-sm text-gray-300">
+                    Nivel <span th:text="${villano.nivel}">1</span> - <span th:text="${villano.tipo}">Villano</span>
+                </p>
+            </div>
+            <a th:if="${batallaActiva != null}" th:href="@{'/batallas/' + ${batallaActiva.id}}"
+               class="bg-red-800 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-lg text-center">
+                ⚔️ Abrir arena completa
+            </a>
+        </div>
+    </div>
+
+    <div id="panelBatallaVillano" th:if="${batallaActiva != null}"
+         class="mb-5 rounded-2xl border border-rose-500/30 bg-gradient-to-r from-slate-950 via-zinc-900 to-slate-950 p-4 shadow-xl shadow-rose-950/20">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+            <div>
+                <p class="text-lg font-bold text-rose-300">⚔️ Combate actual: <span th:text="${batallaActiva.nombre}">Batalla</span></p>
+                <p class="text-sm text-slate-300 mt-1">
+                    Estado: <span id="estadoBatallaVillano" class="text-cyan-300 font-semibold" th:text="${batallaActiva.estado}">EN_CURSO</span>
+                    · Ronda <span id="rondaBatallaVillano" class="text-fuchsia-300 font-semibold" th:text="${batallaActiva.rondaActual}">1</span>
+                </p>
+            </div>
+            <span id="turnoVillanoBadge"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border"
+                  th:classappend="${esTurnoVillano} ? ' border-emerald-400 text-emerald-300 bg-emerald-500/10' : ' border-amber-400 text-amber-300 bg-amber-500/10'"
+                  th:text="${esTurnoVillano} ? 'Es tu turno' : 'Espera tu turno'">Es tu turno</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+                <p class="font-semibold text-cyan-300 mb-2">Objetivos disponibles</p>
+                <select id="objetivoBatallaVillano" class="w-full text-sm px-2 py-2 rounded bg-slate-200 text-slate-900 mb-3">
+                    <option value="">Selecciona un personaje</option>
+                    <option th:each="personaje : ${batallaActiva.personajes}" th:if="${!personaje.derrotado}"
+                            th:value="${personaje.id}" th:text="${personaje.nombre + ' (' + personaje.puntosVida + ' HP)'}">Personaje</option>
+                </select>
+
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded"
+                            th:onclick="'atacarEnBatalla(' + ${villano.id} + ')'">Atacar</button>
+                    <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-2 px-3 rounded"
+                            th:onclick="'finalizarTurnoBatalla(' + ${villano.id} + ')'">Finalizar turno</button>
+                </div>
+
+                <div class="space-y-2">
+                    <div th:each="personaje : ${batallaActiva.personajes}"
+                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-3">
+                            <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-20 h-20 rounded-xl border-cyan-400/30')}"></th:block>
+                            <div>
+                                <p class="text-cyan-300 font-semibold" th:text="${personaje.nombre}">Personaje</p>
+                                <p class="text-xs text-slate-400" th:text="${personaje.clase}">Clase</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p>HP: <span class="text-amber-300 font-bold" th:id="${'vida_personaje_' + personaje.id}" th:text="${personaje.puntosVida}">0</span></p>
+                            <p class="text-[11px] text-slate-400" th:if="${personaje.derrotado}">Derrotado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+                <p class="font-semibold text-yellow-300 mb-2">📜 Log de combate</p>
+                <ul id="logBatallaVillano" class="space-y-2 text-sm max-h-64 overflow-y-auto pr-1">
+                    <li th:each="evento : ${batallaActiva.logCombate}" class="bg-slate-800 border border-slate-700 rounded p-2" th:text="${evento}">Evento</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-sm">
+        <div class="bg-slate-800 rounded p-3 border border-slate-700">
+            <p>HP: <span class="text-rose-300 font-bold" data-villain-life th:text="${villano.puntosVida}">0</span> / <span th:text="${villano.puntosVidaMax}">0</span></p>
+            <p>PE: <span class="text-fuchsia-300 font-bold" id="energiaVillano" th:text="${villano.puntosEnergia}">0</span></p>
+            <p>Iniciativa: <span class="text-cyan-300" id="iniciativaVillano">-</span></p>
+            <button class="mt-2 bg-rose-700 hover:bg-rose-600 text-white text-xs py-1 px-2 rounded"
+                    th:onclick="'tirarIniciativa(' + ${villano.id} + ')'">Tirar iniciativa</button>
+        </div>
+
+        <div class="bg-slate-800 rounded p-3 border border-slate-700">
+            <p class="font-semibold text-yellow-300 mb-1">Atributos</p>
+            <p>FUE: <span th:text="${villano.fuerza}">0</span></p>
+            <p>DES: <span th:text="${villano.destreza}">0</span></p>
+            <p>INT: <span th:text="${villano.inteligencia}">0</span></p>
+            <p>CAR: <span th:text="${villano.carisma}">0</span></p>
+        </div>
+
+        <div class="bg-slate-800 rounded p-3 border border-slate-700">
+            <p class="font-semibold text-yellow-300 mb-1">Estados</p>
+            <ul id="condicionesVillano" class="space-y-1 text-xs">
+                <li th:if="${#lists.isEmpty(villano.condiciones)}" class="text-slate-400">Sin condiciones activas</li>
+                <li th:each="condicion : ${villano.condiciones}" th:id="${'condicion_' + condicion.id}">
+                    <span th:text="${condicion.nombre}">Estado</span>
+                    <span th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-slate-800 rounded p-3 border border-slate-700">
+            <p class="font-semibold text-yellow-300 mb-2">Inventario</p>
+            <div id="inventarioVillano" class="space-y-2">
+                <p th:if="${#lists.isEmpty(villano.inventario)}" class="text-sm text-slate-400">Sin ítems disponibles.</p>
+                <div th:each="item : ${villano.inventario}" th:id="${'item_' + item.id}" class="flex justify-between items-center text-sm border-b border-slate-600 pb-2">
+                    <div>
+                        <span th:text="${item.itemBase.nombre}">Ítem</span>
+                        <span class="ml-2">x<span th:id="${'item_cantidad_' + item.id}" th:text="${item.cantidad}">1</span></span>
+                        <span class="ml-2 text-xs text-emerald-300" th:id="${'item_estado_' + item.id}" th:text="${item.equipado ? 'Equipado' : ''}"></span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
+                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 rounded p-3 border border-slate-700">
+            <p class="font-semibold text-yellow-300 mb-2">Hechizos</p>
+            <div id="hechizosVillano" class="space-y-2">
+                <p th:if="${#lists.isEmpty(villano.hechizos)}" class="text-sm text-slate-400">Sin hechizos disponibles.</p>
+                <div th:each="hechizo : ${villano.hechizos}" class="border-b border-slate-600 pb-2 text-sm">
+                    <p>
+                        <span class="text-yellow-200" th:text="${hechizo.nombre}">Hechizo</span>
+                        (Nivel <span th:text="${hechizo.nivel}">1</span>)
+                    </p>
+                    <p class="text-xs text-gray-300" th:text="${hechizo.descripcion}">Descripción</p>
+                    <button class="mt-1 bg-rose-700 hover:bg-rose-600 text-white text-xs py-1 px-2 rounded"
+                            th:onclick="'lanzarHechizo(' + ${villano.id} + ',' + ${hechizo.id} + ')'"
+                            th:text="${batallaActiva != null ? 'Lanzar en combate' : 'Lanzar'}">Lanzar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-5xl mx-auto mt-4 text-center" th:if="${villano == null}">
+    <p class="text-red-300">No se encontró el villano.</p>
+</div>
+
+<th:block th:replace="~{fragments/layout :: toast()}"></th:block>
+<th:block th:replace="~{fragments/layout :: commonScripts()}"></th:block>
+
+<script>
+
+    function tirarIniciativa(villanoId) {
+        fetch(`/villano/${villanoId}/iniciativa`, { method: 'POST' })
+            .then(resp => {
+                if (!resp.ok) throw new Error('Error al tirar iniciativa');
+                return resp.json();
+            })
+            .then(data => {
+                const ini = document.getElementById('iniciativaVillano');
+                if (ini) ini.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+                showToast(`Iniciativa: ${data.total}`, true);
+            })
+            .catch(() => showToast('No se pudo tirar iniciativa', false));
+    }
+
+    function ejecutarAccionInventario(id, accion, mensajeExito) {
+        fetch(`/inventario/${id}/${accion}`, { method: 'POST' })
+            .then(resp => {
+                if (!resp.ok) throw new Error();
+                return resp.json();
+            })
+            .then(data => {
+                const cantidad = document.getElementById(`item_cantidad_${id}`);
+                const estado = document.getElementById(`item_estado_${id}`);
+                const bloque = document.getElementById(`item_${id}`);
+                if (cantidad) cantidad.textContent = data.cantidad;
+                if (estado) estado.textContent = data.consumido ? 'Consumido' : (data.equipado ? 'Equipado' : '');
+                if (bloque && data.consumido && Number(data.cantidad) <= 0) bloque.remove();
+                showToast(`${mensajeExito}: ${data.nombre}`, true);
+            })
+            .catch(() => showToast('Error en inventario', false));
+    }
+
+    function usarItem(id) {
+        ejecutarAccionInventario(id, 'usar', 'Ítem usado');
+    }
+
+    function equiparItem(id) {
+        ejecutarAccionInventario(id, 'equipar', 'Ítem equipado');
+    }
+
+    function desequiparItem(id) {
+        ejecutarAccionInventario(id, 'desequipar', 'Ítem desequipado');
+    }
+
+    function agregarEventoCombate(evento) {
+        const log = document.getElementById('logBatallaVillano');
+        if (!log || !evento) return;
+
+        const item = document.createElement('li');
+        item.className = 'bg-slate-800 border border-slate-700 rounded p-2';
+        item.textContent = evento;
+        log.prepend(item);
+    }
+
+    function actualizarEstadoCombate(data) {
+        if (!data) return;
+
+        if (data.objetivoTipo && data.objetivoId !== undefined) {
+            const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
+            if (vida && data.vidaRestante !== undefined) {
+                vida.textContent = data.vidaRestante;
+            }
+        }
+
+        if (data.vidaVillano !== undefined) {
+            const vidaVillano = document.querySelector('[data-villain-life]');
+            if (vidaVillano) vidaVillano.textContent = data.vidaVillano;
+        }
+
+        if (data.estadoBatalla) {
+            const estado = document.getElementById('estadoBatallaVillano');
+            if (estado) estado.textContent = data.estadoBatalla;
+        }
+
+        if (data.rondaActual !== undefined) {
+            const ronda = document.getElementById('rondaBatallaVillano');
+            if (ronda) ronda.textContent = data.rondaActual;
+        }
+
+        agregarEventoCombate(data.evento);
+    }
+
+    function atacarEnBatalla(villanoId) {
+        const selector = document.getElementById('objetivoBatallaVillano');
+        if (!selector || !selector.value) {
+            showToast('Selecciona un personaje objetivo', false);
+            return;
+        }
+
+        const body = new URLSearchParams();
+        body.append('objetivoId', selector.value);
+
+        fetch(`/villano/${villanoId}/batalla/atacar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString()
+        })
+            .then(async resp => {
+                if (!resp.ok) {
+                    const error = await resp.json().catch(() => null);
+                    throw new Error(error?.message || 'No se pudo atacar');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                actualizarEstadoCombate(data);
+                showToast(data.evento, true);
+            })
+            .catch(err => showToast(err.message || 'No se pudo atacar', false));
+    }
+
+    function finalizarTurnoBatalla(villanoId) {
+        fetch(`/villano/${villanoId}/batalla/turno/finalizar`, { method: 'POST' })
+            .then(async resp => {
+                if (!resp.ok) {
+                    const error = await resp.json().catch(() => null);
+                    throw new Error(error?.message || 'No se pudo finalizar el turno');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                showToast(data.mensaje || 'Turno finalizado', true);
+                location.reload();
+            })
+            .catch(err => showToast(err.message || 'No se pudo finalizar el turno', false));
+    }
+
+    function lanzarHechizo(villanoId, hechizoId) {
+        const panelBatalla = document.getElementById('panelBatallaVillano');
+        const selector = document.getElementById('objetivoBatallaVillano');
+        const enBatalla = !!panelBatalla;
+        const url = enBatalla
+            ? `/villano/${villanoId}/batalla/hechizos/${hechizoId}/lanzar`
+            : `/villano/${villanoId}/hechizos/${hechizoId}/lanzar`;
+
+        const options = { method: 'POST' };
+        if (enBatalla) {
+            const body = new URLSearchParams();
+            if (selector && selector.value) {
+                body.append('objetivoId', selector.value);
+            }
+            options.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            options.body = body.toString();
+        }
+
+        fetch(url, options)
+            .then(async resp => {
+                if (!resp.ok) {
+                    const error = await resp.json().catch(() => null);
+                    throw new Error(error?.message || 'Error al lanzar hechizo');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                const energia = document.getElementById('energiaVillano');
+                if (energia) energia.textContent = data.energiaRestante;
+                if (enBatalla) {
+                    actualizarEstadoCombate(data);
+                }
+                showToast(`${data.nombre} lanzado. PE: ${data.energiaRestante}`, true);
+            })
+            .catch(err => showToast(err.message || 'Error al lanzar hechizo', false));
+    }
+</script>
+
+</body>
+</html>

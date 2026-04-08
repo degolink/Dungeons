@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.dungeons_and_dragons.rol.model.Batalla;
 import com.dungeons_and_dragons.rol.model.Condicion;
 import com.dungeons_and_dragons.rol.model.Hechizo;
 import com.dungeons_and_dragons.rol.model.ItemBase;
@@ -25,6 +26,7 @@ import com.dungeons_and_dragons.rol.model.ItemInventario;
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.repository.ItemBaseRepository;
 import com.dungeons_and_dragons.rol.repository.ItemInventarioRepository;
+import com.dungeons_and_dragons.rol.service.BatallaService;
 import com.dungeons_and_dragons.rol.service.DadosService;
 import com.dungeons_and_dragons.rol.service.PersonajeService;
 
@@ -35,13 +37,16 @@ public class NarradorController {
     private final DadosService dadosService;
     private final ItemInventarioRepository itemInventarioRepository;
     private final ItemBaseRepository itemBaseRepository;
+    private final BatallaService batallaService;
 
     public NarradorController(PersonajeService personajeService, DadosService dadosService,
-            ItemInventarioRepository itemInventarioRepository, ItemBaseRepository itemBaseRepository) {
+            ItemInventarioRepository itemInventarioRepository, ItemBaseRepository itemBaseRepository,
+            BatallaService batallaService) {
         this.personajeService = personajeService;
         this.dadosService = dadosService;
         this.itemInventarioRepository = itemInventarioRepository;
         this.itemBaseRepository = itemBaseRepository;
+        this.batallaService = batallaService;
     }
 
     @GetMapping("/")
@@ -56,6 +61,17 @@ public class NarradorController {
         model.addAttribute("newPersonaje", new Personaje());
         System.out.println("Personajes encontrados: " + personajes.size());
         return "narrador";
+    }
+
+    @GetMapping("/jugador/{id}")
+    public String mostrarVistaJugador(@PathVariable Long id, Model model) {
+        Personaje personaje = buscarPersonaje(id);
+        Batalla batallaActiva = batallaService.buscarActivaPorPersonaje(id).orElse(null);
+
+        model.addAttribute("personaje", personaje);
+        model.addAttribute("batallaActiva", batallaActiva);
+        model.addAttribute("esTurnoJugador", batallaActiva != null && personaje.isTurnoActual() && !personaje.isDerrotado());
+        return "jugador";
     }
 
     @PostMapping("addData")
@@ -283,6 +299,47 @@ public class NarradorController {
         Personaje actualizado = personajeService.guardar(personaje);
 
         return construirRespuestaHechizo(actualizado, hechizo, costeEnergia);
+    }
+
+    @GetMapping("/jugador/{id}/batalla/estado")
+    @ResponseBody
+    public Map<String, Object> obtenerEstadoBatallaJugador(@PathVariable Long id) {
+        Personaje personaje = buscarPersonaje(id);
+        Batalla batalla = batallaService.buscarActivaPorPersonaje(id).orElse(null);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("personajeId", personaje.getId());
+        response.put("enBatalla", batalla != null);
+        response.put("esTurnoJugador", personaje.isTurnoActual() && !personaje.isDerrotado());
+
+        if (batalla != null) {
+            response.put("batallaId", batalla.getId());
+            response.put("nombreBatalla", batalla.getNombre());
+            response.put("estado", batalla.getEstado());
+            response.put("rondaActual", batalla.getRondaActual());
+        }
+        return response;
+    }
+
+    @PostMapping("/jugador/{personajeId}/batalla/atacar")
+    @ResponseBody
+    public Map<String, Object> atacarDesdeJugador(@PathVariable Long personajeId, @RequestParam Long objetivoId) {
+        return batallaService.atacarDesdeJugador(personajeId, objetivoId);
+    }
+
+    @PostMapping("/jugador/{personajeId}/batalla/hechizos/{hechizoId}/lanzar")
+    @ResponseBody
+    public Map<String, Object> lanzarHechizoEnBatalla(
+            @PathVariable Long personajeId,
+            @PathVariable Long hechizoId,
+            @RequestParam(required = false) Long objetivoId) {
+        return batallaService.lanzarHechizoDesdeJugador(personajeId, hechizoId, objetivoId);
+    }
+
+    @PostMapping("/jugador/{personajeId}/batalla/turno/finalizar")
+    @ResponseBody
+    public Map<String, Object> finalizarTurnoJugador(@PathVariable Long personajeId) {
+        return batallaService.finalizarTurnoJugador(personajeId);
     }
 
     @PostMapping("/personaje")
