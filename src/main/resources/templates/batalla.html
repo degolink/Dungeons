@@ -10,7 +10,7 @@
 <div class="max-w-7xl mx-auto" th:if="${batalla != null}">
     <div class="rounded-3xl border border-slate-700/80 bg-slate-900/85 shadow-2xl shadow-red-950/30 backdrop-blur-sm p-4 md:p-6">
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-            <section class="xl:col-span-3 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 shadow-lg">
+            <section class="xl:col-span-3 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 shadow-lg" data-anim-panel="battle-heroes">
                 <div class="flex items-center justify-between mb-3 gap-2">
                     <h2 class="text-lg font-bold text-yellow-300">🧙 Personajes</h2>
                     <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20" th:text="${#lists.size(batalla.personajes)} + ' activos'">0 activos</span>
@@ -18,16 +18,18 @@
                 <div id="listaPersonajes" class="flex flex-col gap-3">
                     <div th:each="personaje : ${batalla.personajes}" class="rounded-2xl border p-3 shadow-md transition-all"
                          th:attr="data-combatiente='true',data-orden=${personaje.ordenTurno},data-nombre=${personaje.nombre},data-tipo='Héroe',data-turno=${personaje.turnoActual}"
+                         data-anim-card="battle-hero"
                          th:style="'order:' + ${personaje.ordenTurno}"
                          th:classappend="${personaje.turnoActual} ? ' border-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-300/30' : ' border-slate-700 bg-slate-900/70'">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                             <div class="flex items-center gap-3 min-w-0">
                                 <div class="shrink-0 w-36 h-36 md:w-36 md:h-36 overflow-hidden rounded-lg border border-cyan-400/20 shadow-md shadow-cyan-950/20 bg-transparent flex items-center justify-center">
-                                    <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-full h-full rounded-none border-0 shadow-none object-cover object-center scale-110')} "></th:block>
+                                    <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-full h-full')} "></th:block>
                                 </div>
                                 <p class="font-semibold text-cyan-300 break-words" th:text="${personaje.nombre}">Personaje</p>
                             </div>
                             <div class="self-start shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border"
+                                 th:attr="data-turn-indicator=${personaje.turnoActual}"
                                  th:classappend="${personaje.turnoActual} ? ' border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'">
                                 <span th:text="${personaje.turnoActual} ? 'Turno' : 'Orden'">Orden</span>
                                 <span class="font-semibold">#<span th:text="${personaje.ordenTurno} ?: 0">0</span></span>
@@ -45,8 +47,8 @@
                 </div>
             </section>
 
-            <section class="xl:col-span-6 space-y-4">
-                <div class="rounded-3xl border border-red-400/20 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-4 md:p-6 shadow-xl text-center">
+            <section class="xl:col-span-6 space-y-4" data-anim-panel="battle-center">
+                <div id="battleArenaStage" class="rounded-3xl border border-red-400/20 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-4 md:p-6 shadow-xl text-center">
                     <p class="text-xs uppercase tracking-[0.35em] text-red-300 mb-2">Arena principal</p>
                     <h2 class="text-2xl md:text-3xl font-bold text-amber-200 mb-3" th:text="${batalla.nombre}">Batalla</h2>
 
@@ -97,7 +99,7 @@
                 </div>
             </section>
 
-            <section class="xl:col-span-3 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 shadow-lg">
+            <section class="xl:col-span-3 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 shadow-lg" data-anim-panel="battle-villains">
                 <div class="flex items-center justify-between mb-3 gap-2">
                     <h2 class="text-lg font-bold text-red-300">👹 Villanos</h2>
                     <span class="text-xs px-2 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-400/20" th:text="${#lists.size(batalla.villanos)} + ' amenazas'">0 amenazas</span>
@@ -105,14 +107,21 @@
                 <div id="listaVillanos" class="flex flex-col gap-3">
                     <div th:each="villano : ${batalla.villanos}" class="rounded-2xl border p-3 shadow-md transition-all"
                          th:attr="data-combatiente='true',data-orden=${villano.ordenTurno},data-nombre=${villano.nombre},data-tipo='Villano',data-turno=${villano.turnoActual}"
+                         data-anim-card="battle-villain"
                          th:style="'order:' + ${villano.ordenTurno}"
                          th:classappend="${villano.turnoActual} ? ' border-rose-400 bg-rose-500/10 ring-1 ring-rose-300/30' : ' border-slate-700 bg-slate-900/70'">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                            <div class="min-w-0">
-                                <p class="font-semibold text-rose-300 break-words" th:text="${villano.nombre}">Villano</p>
-                                <p class="text-xs text-slate-300" th:text="${villano.tipo}">Tipo</p>
+                            <div class="flex flex-col gap-3 min-w-0">
+                                <div class="shrink-0 w-36 h-36 md:w-36 md:h-36 overflow-hidden rounded-lg border border-cyan-400/20 shadow-md shadow-cyan-950/20 bg-transparent flex items-center justify-center self-start">
+                                    <th:block th:replace="~{fragments/media :: heroPortrait(${villano.imagen}, 'Retrato del villano', 'w-full h-full')}"></th:block>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-rose-300 break-words leading-tight" th:text="${villano.nombre}">Villano</p>
+                                    <p class="text-xs text-slate-300 break-words" th:text="${villano.tipo}">Tipo</p>
+                                </div>
                             </div>
                             <div class="self-start shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border"
+                                 th:attr="data-turn-indicator=${villano.turnoActual}"
                                  th:classappend="${villano.turnoActual} ? ' border-rose-400/40 text-rose-300 bg-rose-500/10' : ' border-slate-600 text-slate-300 bg-slate-800'">
                                 <span th:text="${villano.turnoActual} ? 'Turno' : 'Orden'">Orden</span>
                                 <span class="font-semibold">#<span th:text="${villano.ordenTurno} ?: 0">0</span></span>
@@ -203,6 +212,17 @@
             `;
         }).join('');
 
+        if (typeof window.anime === 'function') {
+            window.anime({
+                targets: '#ordenIniciativa > div',
+                opacity: [0, 1],
+                translateX: [-10, 0],
+                duration: 280,
+                delay: window.anime.stagger(35),
+                easing: 'easeOutQuad'
+            });
+        }
+
         if (!hayIniciativa) {
             contenedor.insertAdjacentHTML('beforeend', '<p class="text-slate-400 col-span-full text-xs">Pulsa <strong>Iniciar batalla</strong> para calcular el orden de iniciativa.</p>');
         }
@@ -244,13 +264,7 @@
     }
 
     function agregarEventoCombate(evento) {
-        const log = document.getElementById('logCombate');
-        if (!log || !evento) return;
-
-        const item = document.createElement('li');
-        item.className = 'bg-slate-900/70 border border-slate-700 rounded-xl p-3';
-        item.textContent = evento;
-        log.prepend(item);
+        prependLogItem('logCombate', evento, 'bg-slate-900/70 border border-slate-700 rounded-xl p-3');
     }
 
     function actualizarEstadoDesdeVillano(data) {
@@ -260,12 +274,25 @@
             const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
             if (vida && data.vidaRestante !== undefined) {
                 vida.textContent = data.vidaRestante;
+                animateValueChange(vida);
+                animateBattleImpact(vida.closest('[data-anim-card]') || vida, 'rgba(248, 113, 113, 0.55)');
+            }
+        }
+
+        if (data.estadoBatalla) {
+            const estado = document.querySelector('[data-anim-panel="battle-center"] strong');
+            if (estado) {
+                estado.textContent = data.estadoBatalla;
+                animateValueChange(estado);
             }
         }
 
         if (data.rondaActual !== undefined) {
             const ronda = document.getElementById('ronda');
-            if (ronda) ronda.textContent = data.rondaActual;
+            if (ronda) {
+                ronda.textContent = data.rondaActual;
+                animateValueChange(ronda);
+            }
         }
 
         agregarEventoCombate(data.evento || data.mensaje);
@@ -294,8 +321,22 @@
                 return resp.json();
             })
             .then(data => {
-                actualizarEstadoDesdeVillano(data);
-                showToast(data.evento || 'Ataque realizado', true);
+                const attackerCard = document.getElementById(`vida_villano_${villanoId}`)?.closest('[data-anim-card]');
+                const targetCard = document.getElementById(`vida_personaje_${selector.value}`)?.closest('[data-anim-card]');
+                const details = data?.danio !== undefined || data?.critico !== undefined
+                    ? { damage: data.danio ?? null, critical: !!data.critico, blocked: !!data.bloqueado }
+                    : parseCombatEventDetails(data?.evento || '');
+
+                animateMeleeExchange({
+                    attacker: attackerCard,
+                    target: targetCard,
+                    scene: document.getElementById('battleArenaStage') || document.querySelector('[data-anim-panel="battle-center"]'),
+                    damage: details.damage,
+                    critical: details.critical,
+                    blocked: details.blocked,
+                    variant: 'axe',
+                    onImpact: () => actualizarEstadoDesdeVillano(data)
+                }).then(() => showToast(data.evento || 'Ataque realizado', true));
             })
             .catch(err => showToast(err.message || 'No se pudo atacar', false));
     }

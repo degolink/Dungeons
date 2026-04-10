@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.dungeons_and_dragons.rol.model.Batalla;
+import com.dungeons_and_dragons.rol.model.Condicion;
 import com.dungeons_and_dragons.rol.model.Hechizo;
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.model.Villano;
@@ -88,7 +89,9 @@ public class BatallaService {
             int vidaNueva = Math.min(personaje.getPuntosVidaMax(), personaje.getPuntosVida() + curacion);
             int vidaRecuperada = vidaNueva - personaje.getPuntosVida();
             personaje.setPuntosVida(vidaNueva);
-            evento = personaje.getNombre() + " lanzó " + hechizo.getNombre() + " y recuperó " + vidaRecuperada + " puntos de vida.";
+            String detalleCondiciones = aplicarCondiciones(personaje, hechizo);
+            evento = personaje.getNombre() + " lanzó " + hechizo.getNombre() + " y recuperó " + vidaRecuperada
+                    + " puntos de vida." + detalleCondiciones;
             response.put("vidaJugador", vidaNueva);
         } else {
             if (objetivoId == null) {
@@ -107,12 +110,17 @@ public class BatallaService {
             objetivo.setPuntosVida(vidaRestante);
             objetivo.setDerrotado(vidaRestante <= 0);
 
+            String detalleCondiciones = aplicarCondiciones(objetivo, hechizo);
             evento = personaje.getNombre() + " lanzó " + hechizo.getNombre() + " sobre " + objetivo.getNombre()
-                    + " e infligió " + danio + " de daño.";
+                    + " e infligió " + danio + " de daño." + detalleCondiciones;
             response.put("objetivoId", objetivo.getId());
             response.put("objetivoTipo", "villano");
             response.put("vidaRestante", vidaRestante);
             response.put("derrotado", vidaRestante <= 0);
+        }
+
+        if (hechizo.getCondiciones() != null && !hechizo.getCondiciones().isEmpty()) {
+            response.put("condicionesAplicadas", hechizo.getCondiciones().stream().map(Condicion::getNombre).toList());
         }
 
         batalla.getLogCombate().add(0, evento);
@@ -174,7 +182,9 @@ public class BatallaService {
             int vidaNueva = Math.min(villano.getPuntosVidaMax(), villano.getPuntosVida() + curacion);
             int vidaRecuperada = vidaNueva - villano.getPuntosVida();
             villano.setPuntosVida(vidaNueva);
-            evento = villano.getNombre() + " lanzó " + hechizo.getNombre() + " y recuperó " + vidaRecuperada + " puntos de vida.";
+            String detalleCondiciones = aplicarCondiciones(villano, hechizo);
+            evento = villano.getNombre() + " lanzó " + hechizo.getNombre() + " y recuperó " + vidaRecuperada
+                    + " puntos de vida." + detalleCondiciones;
             response.put("vidaVillano", vidaNueva);
         } else {
             if (objetivoId == null) {
@@ -193,12 +203,17 @@ public class BatallaService {
             objetivo.setPuntosVida(vidaRestante);
             objetivo.setDerrotado(vidaRestante <= 0);
 
+            String detalleCondiciones = aplicarCondiciones(objetivo, hechizo);
             evento = villano.getNombre() + " lanzó " + hechizo.getNombre() + " sobre " + objetivo.getNombre()
-                    + " e infligió " + danio + " de daño.";
+                    + " e infligió " + danio + " de daño." + detalleCondiciones;
             response.put("objetivoId", objetivo.getId());
             response.put("objetivoTipo", "personaje");
             response.put("vidaRestante", vidaRestante);
             response.put("derrotado", vidaRestante <= 0);
+        }
+
+        if (hechizo.getCondiciones() != null && !hechizo.getCondiciones().isEmpty()) {
+            response.put("condicionesAplicadas", hechizo.getCondiciones().stream().map(Condicion::getNombre).toList());
         }
 
         batalla.getLogCombate().add(0, evento);
@@ -342,6 +357,8 @@ public class BatallaService {
         response.put("objetivoId", objetivo.id());
         response.put("vidaRestante", vidaRestante);
         response.put("derrotado", vidaRestante <= 0);
+        response.put("danio", danio);
+        response.put("critico", critico);
         response.put("estadoBatalla", actualizada.getEstado());
         response.put("rondaActual", actualizada.getRondaActual());
         return response;
@@ -367,33 +384,94 @@ public class BatallaService {
         }
 
         Batalla batalla = new Batalla();
-        batalla.setNombre("Asalto al campamento goblin");
+        batalla.setNombre("Convergencia de la Torre Carmesí");
         batalla.setEstado("PREPARADA");
         batalla.setRondaActual(0);
         batalla.setPersonajes(new ArrayList<>(personajes.subList(0, Math.min(4, personajes.size()))));
-        batalla.getVillanos().add(crearVillano("Goblin explorador", "Goblinoide", 1, 12, 14));
-        batalla.getVillanos().add(crearVillano("Chamán oscuro", "Humanoide", 2, 16, 12));
-        batalla.getLogCombate().add("La batalla está lista. Pulsa 'Iniciar batalla' para tirar iniciativa.");
+        batalla.getVillanos().add(crearArchimagoOscuro());
+        batalla.getVillanos().add(crearSenorDeLaGuerra());
+        batalla.getLogCombate().add("El Archimago Oscuro y el Señor de la Guerra aguardan. Pulsa 'Iniciar batalla' para tirar iniciativa.");
         return batallaRepository.save(batalla);
     }
 
-    private Villano crearVillano(String nombre, String tipo, int nivel, int vida, int destreza) {
+    private Villano crearArchimagoOscuro() {
+        return crearVillano(
+                "Archimago Oscuro",
+                "control + daño mágico",
+                "/img/Archimago%20Oscuro.png",
+                20,
+                9,
+                14,
+                16,
+                20,
+                16,
+                18,
+                170,
+                220,
+                List.of(
+                        crearHechizo("Fire Bolt", 3, "ataque", "Un rayo de fuego comprimido impacta con violencia arcana.", 18, 0, false),
+                        crearHechizo("Fireball", 5, "ataque", "Una explosión infernal arrasa a su objetivo.", 28, 0, false),
+                        crearHechizo("Chain Lightning", 6, "ataque", "Rayos encadenados recorren el campo de batalla.", 32, 0, false),
+                        crearHechizoConCondicion("Dominate Person", 5, "utilidad", "Somete la mente del enemigo a su voluntad.", 14, 2, true,
+                                "Dominado", "El objetivo queda manipulado por la magia oscura.", 2),
+                        crearHechizo("Finger of Death", 7, "ataque", "Una descarga mortal de energía necrótica.", 40, 0, false)));
+    }
+
+    private Villano crearSenorDeLaGuerra() {
+        return crearVillano(
+                "Señor de la Guerra",
+                "presión física + frontline",
+                "/img/Se%C3%B1or%20de%20la%20Guerra.jpeg",
+                20,
+                22,
+                14,
+                20,
+                12,
+                14,
+                18,
+                240,
+                140,
+                List.of(
+                        crearHechizo("Espada gigante", 4, "ataque", "Tres golpes brutales con una hoja descomunal.", 20, 0, false),
+                        crearHechizo("Ataque múltiple", 5, "ataque", "Una cadena de embestidas mantiene la presión sobre el frente.", 24, 0, false),
+                        crearHechizo("Golpe devastador", 6, "ataque", "Un barrido demoledor que aplasta todo a su paso.", 30, 0, false),
+                        crearHechizoConCondicion("Presencia dominante", 3, "ataque", "Su mera presencia infunde terror en el enemigo.", 12, 2, false,
+                                "Asustado", "El objetivo vacila ante la autoridad aplastante del caudillo.", 2),
+                        crearHechizo("Ataque pesado", 4, "ataque", "Un tajo cargado con toda su fuerza marcial.", 22, 0, false)));
+    }
+
+    private Villano crearVillano(String nombre, String tipo, String imagen, int nivel, int fuerza, int destreza,
+            int constitucion, int inteligencia, int sabiduria, int carisma, int vida, int energia,
+            List<Hechizo> hechizos) {
         Villano villano = new Villano();
         villano.setNombre(nombre);
         villano.setTipo(tipo);
+        villano.setImagen(imagen);
         villano.setNivel(nivel);
         villano.setPuntosVida(vida);
         villano.setPuntosVidaMax(vida);
-        villano.setPuntosEnergia(Math.max(0, nivel * 2));
-        villano.setFuerza(12 + nivel);
+        villano.setPuntosEnergia(Math.max(0, energia));
+        villano.setFuerza(fuerza);
         villano.setDestreza(destreza);
-        villano.setConstitucion(11 + nivel);
-        villano.setInteligencia(9 + nivel);
-        villano.setSabiduria(10);
-        villano.setCarisma(8);
-        villano.getHechizos().add(crearHechizo("Golpe oscuro", Math.max(1, nivel), "ataque", "Un impacto sombrío contra su objetivo.", 3 + nivel, 0, false));
-        villano.getHechizos().add(crearHechizo("Sello siniestro", 1, "curacion", "Recupera algo de vitalidad oscura.", 2 + nivel, 0, false));
+        villano.setConstitucion(constitucion);
+        villano.setInteligencia(inteligencia);
+        villano.setSabiduria(sabiduria);
+        villano.setCarisma(carisma);
+        villano.getHechizos().addAll(hechizos);
         return villano;
+    }
+
+    private Hechizo crearHechizoConCondicion(String nombre, int nivel, String tipo, String descripcion, int danio,
+            int duracion, boolean requiereConcentracion, String condicionNombre, String condicionDescripcion,
+            int condicionDuracion) {
+        Hechizo hechizo = crearHechizo(nombre, nivel, tipo, descripcion, danio, duracion, requiereConcentracion);
+        Condicion condicion = new Condicion();
+        condicion.setNombre(condicionNombre);
+        condicion.setDescripcion(condicionDescripcion);
+        condicion.setDuracion(condicionDuracion);
+        condicion.setHechizoOrigen(hechizo);
+        hechizo.getCondiciones().add(condicion);
+        return hechizo;
     }
 
     private Hechizo crearHechizo(String nombre, int nivel, String tipo, String descripcion, int danio, int duracion,
@@ -577,6 +655,53 @@ public class BatallaService {
         return !"VICTORIA_PERSONAJES".equalsIgnoreCase(estado)
                 && !"VICTORIA_VILLANOS".equalsIgnoreCase(estado)
                 && !"FINALIZADA".equalsIgnoreCase(estado);
+    }
+
+    private String aplicarCondiciones(Personaje objetivo, Hechizo hechizo) {
+        if (objetivo.getCondiciones() == null) {
+            objetivo.setCondiciones(new ArrayList<>());
+        }
+        return aplicarCondicionesALista(objetivo.getCondiciones(), hechizo);
+    }
+
+    private String aplicarCondiciones(Villano objetivo, Hechizo hechizo) {
+        if (objetivo.getCondiciones() == null) {
+            objetivo.setCondiciones(new ArrayList<>());
+        }
+        return aplicarCondicionesALista(objetivo.getCondiciones(), hechizo);
+    }
+
+    private String aplicarCondicionesALista(List<Condicion> condicionesObjetivo, Hechizo hechizo) {
+        if (hechizo.getCondiciones() == null || hechizo.getCondiciones().isEmpty()) {
+            return "";
+        }
+
+        List<String> nombresAplicados = new ArrayList<>();
+        for (Condicion base : hechizo.getCondiciones()) {
+            if (base == null || base.getNombre() == null || base.getNombre().isBlank()) {
+                continue;
+            }
+
+            Condicion aplicada = new Condicion();
+            aplicada.setNombre(base.getNombre().trim());
+            aplicada.setDescripcion(base.getDescripcion() == null ? "" : base.getDescripcion().trim());
+            aplicada.setDuracion(base.getDuracion() > 0 ? base.getDuracion() : Math.max(0, hechizo.getDuracion()));
+            aplicada.setHechizoOrigen(hechizo);
+            condicionesObjetivo.add(aplicada);
+
+            String resumen = aplicada.getNombre();
+            if (aplicada.getDuracion() > 0) {
+                resumen += " (" + aplicada.getDuracion() + " turnos)";
+            }
+            nombresAplicados.add(resumen);
+        }
+
+        if (nombresAplicados.isEmpty()) {
+            return "";
+        }
+
+        String prefijo = nombresAplicados.size() == 1 ? " la condición " : " las condiciones ";
+        return " También aplicó" + prefijo + String.join(", ", nombresAplicados) + ".";
     }
 
     private boolean esHechizoCuracion(Hechizo hechizo) {

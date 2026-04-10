@@ -88,6 +88,23 @@ class NarradorControllerTest {
     }
 
     @Test
+    void deberiaActualizarEnergiaSinPermitirValoresNegativos() {
+        Personaje personaje = new Personaje();
+        personaje.setId(1L);
+        personaje.setPuntosEnergia(8);
+
+        when(personajeService.buscarPorId(1L)).thenReturn(Optional.of(personaje));
+        when(personajeService.actualizarEnergia(personaje, -10)).thenAnswer(invocation -> {
+            personaje.setPuntosEnergia(0);
+            return personaje;
+        });
+
+        Map<String, Object> response = narradorController.actualizarEnergia(1L, -10);
+
+        assertEquals(0, response.get("puntosEnergia"));
+    }
+
+    @Test
     void deberiaAgregarCondicionAlPersonaje() {
         Personaje personaje = new Personaje();
         personaje.setId(1L);
@@ -167,11 +184,24 @@ class NarradorControllerTest {
             return personaje;
         });
 
-        Map<String, Object> response = narradorController.agregarHechizo(1L, "Escudo", 1, "defensa", "Aumenta la protección", 0, 3, true);
+        Map<String, Object> response = narradorController.agregarHechizo(
+                1L,
+                "Escudo",
+                1,
+                "defensa",
+                "Aumenta la protección",
+                0,
+                3,
+                true,
+                "Bendecido",
+                "Otorga protección sagrada",
+                2);
 
         assertEquals(42L, response.get("id"));
         assertEquals("Escudo", response.get("nombre"));
         assertEquals(1, personaje.getHechizos().size());
+        assertEquals(1, personaje.getHechizos().get(0).getCondiciones().size());
+        assertEquals("Bendecido", personaje.getHechizos().get(0).getCondiciones().get(0).getNombre());
     }
 
     @Test

@@ -23,6 +23,7 @@ public class Villano {
 
     private String nombre;
     private String tipo;
+    private String imagen;
     private int nivel;
 
     private int fuerza;

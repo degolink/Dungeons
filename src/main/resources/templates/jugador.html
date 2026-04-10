@@ -7,16 +7,25 @@
     Vista del Jugador
 </h1>
 
-<div class="max-w-5xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${personaje != null}">
+<div class="max-w-5xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${personaje != null}" data-anim-panel="player-root">
     <div class="mb-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center gap-4">
-                <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-auto max-w-full h-52 md:h-72 rounded-lg border-cyan-400/20 shadow-md shadow-cyan-950/20')}"></th:block>
+                <button type="button"
+                        data-modal-open="playerStatsModal"
+                        aria-label="Ver estadísticas del héroe"
+                        class="group relative block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400/70">
+                    <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-auto max-w-full h-52 md:h-72 rounded-lg border-cyan-400/20 shadow-md shadow-cyan-950/20')}"></th:block>
+                    <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-slate-950/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200 opacity-0 transition group-hover:opacity-100 group-focus:opacity-100">
+                        Toca para ver la ficha
+                    </span>
+                </button>
                 <div>
                     <p class="text-xl text-yellow-300 font-bold" th:text="${personaje.nombre}">Nombre</p>
                     <p class="text-sm text-gray-300">
                         Nivel <span th:text="${personaje.nivel}">1</span> - <span th:text="${personaje.clase}">Aventurero</span>
                     </p>
+                    <p class="text-xs text-cyan-200 mt-2">Pulsa el retrato para abrir las estadísticas.</p>
                 </div>
             </div>
             <a th:if="${batallaActiva != null}" th:href="@{'/batallas/' + ${batallaActiva.id}}"
@@ -26,8 +35,73 @@
         </div>
     </div>
 
+    <div id="playerStatsModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6" data-modal-root>
+        <div class="absolute inset-0 bg-black/75" data-modal-overlay="playerStatsModal"></div>
+        <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-cyan-400/30 bg-slate-950/95 p-4 md:p-6 shadow-2xl shadow-cyan-950/40">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.35em] text-cyan-300">Ficha del héroe</p>
+                    <h2 class="text-2xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</h2>
+                    <p class="text-sm text-slate-300">
+                        Nivel <span th:text="${personaje.nivel}">1</span> · <span th:text="${personaje.clase}">Aventurero</span>
+                    </p>
+                </div>
+                <button type="button" data-modal-close="playerStatsModal"
+                        class="rounded-lg border border-slate-600 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800">
+                    ✕
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-100">
+                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                    <p class="font-semibold text-amber-300">Resumen</p>
+                    <p>Apodo: <span class="text-cyan-200" th:text="${personaje.apodo != null and !#strings.isEmpty(personaje.apodo) ? personaje.apodo : 'Sin apodo'}">Sin apodo</span></p>
+                    <p>Raza: <span class="text-cyan-200" th:text="${personaje.raza != null and !#strings.isEmpty(personaje.raza) ? personaje.raza : 'Desconocida'}">Desconocida</span></p>
+                    <p>Alineamiento: <span class="text-cyan-200" th:text="${personaje.alineamiento != null and !#strings.isEmpty(personaje.alineamiento) ? personaje.alineamiento : 'Neutral'}">Neutral</span></p>
+                    <p>Experiencia: <span class="text-cyan-200" th:text="${personaje.experiencia}">0</span></p>
+                </div>
+
+                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                    <p class="font-semibold text-emerald-300">Recursos</p>
+                    <p>HP: <span class="text-emerald-300 font-bold" th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
+                    <p>PE: <span class="text-fuchsia-300 font-bold" th:text="${personaje.puntosEnergia}">0</span></p>
+                    <p>Iniciativa actual: <span class="text-cyan-300" th:text="${personaje.iniciativaActual}">0</span></p>
+                    <p>Orden de turno: <span class="text-cyan-300" th:text="${'#' + personaje.ordenTurno}">#0</span></p>
+                </div>
+
+                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                    <p class="font-semibold text-purple-300 mb-2">Atributos</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <p>FUE: <span class="text-amber-200" th:text="${personaje.fuerza}">0</span></p>
+                        <p>DES: <span class="text-amber-200" th:text="${personaje.destreza}">0</span></p>
+                        <p>CON: <span class="text-amber-200" th:text="${personaje.constitucion}">0</span></p>
+                        <p>INT: <span class="text-amber-200" th:text="${personaje.inteligencia}">0</span></p>
+                        <p>SAB: <span class="text-amber-200" th:text="${personaje.sabiduria}">0</span></p>
+                        <p>CAR: <span class="text-amber-200" th:text="${personaje.carisma}">0</span></p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                    <p class="font-semibold text-yellow-300 mb-2">Estados y monedas</p>
+                    <ul class="space-y-1 mb-3 text-xs">
+                        <li th:if="${#lists.isEmpty(personaje.condiciones)}" class="text-slate-400">Sin estados alterados.</li>
+                        <li th:each="condicion : ${personaje.condiciones}">
+                            <span th:text="${condicion.nombre}">Estado</span>
+                            <span class="text-cyan-300" th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
+                        </li>
+                    </ul>
+                    <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
+                    <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
+                    <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
+                    <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="panelBatallaJugador" th:if="${batallaActiva != null}"
-         class="mb-5 rounded-2xl border border-red-500/30 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-4 shadow-xl shadow-red-950/20">
+         class="mb-5 rounded-2xl border border-red-500/30 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-4 shadow-xl shadow-red-950/20"
+         data-anim-panel="player-battle">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
             <div>
                 <p class="text-lg font-bold text-red-300">⚔️ Combate actual: <span th:text="${batallaActiva.nombre}">Batalla</span></p>
@@ -38,6 +112,7 @@
             </div>
             <span id="turnoJugadorBadge"
                   class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border"
+                  th:attr="data-turn-indicator=${esTurnoJugador}"
                   th:classappend="${esTurnoJugador} ? ' border-emerald-400 text-emerald-300 bg-emerald-500/10' : ' border-amber-400 text-amber-300 bg-amber-500/10'"
                   th:text="${esTurnoJugador} ? 'Es tu turno' : 'Espera tu turno'">Es tu turno</span>
         </div>
@@ -45,11 +120,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
                 <p class="font-semibold text-red-300 mb-2">Objetivos enemigos</p>
-                <select id="objetivoBatalla" class="w-full text-sm px-2 py-2 rounded bg-slate-200 text-slate-900 mb-3">
-                    <option value="">Selecciona un villano</option>
-                    <option th:each="villano : ${batallaActiva.villanos}" th:if="${!villano.derrotado}"
-                            th:value="${villano.id}" th:text="${villano.nombre + ' (' + villano.puntosVida + ' HP)'}">Villano</option>
-                </select>
+                <input type="hidden" id="objetivoBatalla" value="" />
+                <p class="text-xs text-slate-300 mb-3">
+                    Haz clic en una caja de enemigo para seleccionarlo.
+                    <span id="objetivoBatallaLabel" class="text-cyan-300 font-semibold">Ninguno</span>
+                </p>
 
                 <div class="flex flex-wrap gap-2 mb-3">
                     <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded"
@@ -60,7 +135,12 @@
 
                 <div class="space-y-2">
                     <div th:each="villano : ${batallaActiva.villanos}"
-                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2">
+                         th:id="${'objetivo_card_villano_' + villano.id}"
+                         th:attr="data-objetivo-id=${villano.id},data-objetivo-nombre=${villano.nombre},data-objetivo-derrotado=${villano.derrotado}"
+                         data-anim-card="enemy-target"
+                         onclick="seleccionarObjetivoBatalla(this)"
+                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2 transition-all"
+                         th:classappend="${villano.derrotado} ? ' opacity-60 cursor-not-allowed' : ' cursor-pointer hover:border-rose-400 hover:bg-slate-700/80'">
                         <div>
                             <p class="text-rose-300 font-semibold" th:text="${villano.nombre}">Villano</p>
                             <p class="text-xs text-slate-400" th:text="${villano.tipo}">Tipo</p>
@@ -68,6 +148,7 @@
                         <div class="text-right">
                             <p>HP: <span class="text-rose-300 font-bold" th:id="${'vida_villano_' + villano.id}" th:text="${villano.puntosVida}">0</span></p>
                             <p class="text-[11px] text-slate-400" th:if="${villano.derrotado}">Derrotado</p>
+                            <p class="text-[11px] text-emerald-300 hidden" th:id="${'objetivo_tag_villano_' + villano.id}">Seleccionado</p>
                         </div>
                     </div>
                 </div>
@@ -156,6 +237,42 @@
 
 <script>
 
+    function seleccionarObjetivoBatalla(card) {
+        if (!card || card.dataset.objetivoDerrotado === 'true') {
+            return;
+        }
+
+        const objetivoId = card.dataset.objetivoId;
+        const objetivoNombre = card.dataset.objetivoNombre || 'Objetivo';
+        const input = document.getElementById('objetivoBatalla');
+        const label = document.getElementById('objetivoBatallaLabel');
+
+        if (input) input.value = objetivoId;
+        if (label) label.textContent = objetivoNombre;
+
+        document.querySelectorAll('[id^="objetivo_card_villano_"]').forEach(item => {
+            item.classList.remove('border-emerald-400', 'bg-emerald-500/10', 'ring-1', 'ring-emerald-300/30');
+            item.classList.add('border-slate-700');
+        });
+
+        document.querySelectorAll('[id^="objetivo_tag_villano_"]').forEach(item => item.classList.add('hidden'));
+
+        card.classList.remove('border-slate-700');
+        card.classList.add('border-emerald-400', 'bg-emerald-500/10', 'ring-1', 'ring-emerald-300/30');
+
+        const tag = document.getElementById(`objetivo_tag_villano_${objetivoId}`);
+        if (tag) tag.classList.remove('hidden');
+
+        animateSelectionCard(card);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const primerObjetivo = document.querySelector('[id^="objetivo_card_villano_"][data-objetivo-derrotado="false"]');
+        if (primerObjetivo) {
+            seleccionarObjetivoBatalla(primerObjetivo);
+        }
+    });
+
     function tirarIniciativa(personajeId) {
         fetch(`/personaje/${personajeId}/iniciativa`, { method: 'POST' })
             .then(resp => {
@@ -164,7 +281,10 @@
             })
             .then(data => {
                 const ini = document.getElementById('iniciativa');
-                if (ini) ini.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+                if (ini) {
+                    ini.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+                    animateValueChange(ini);
+                }
                 showToast(`Iniciativa: ${data.total}`, true);
             })
             .catch(() => showToast('No se pudo tirar iniciativa', false));
@@ -201,13 +321,7 @@
     }
 
     function agregarEventoCombate(evento) {
-        const log = document.getElementById('logBatalla');
-        if (!log || !evento) return;
-
-        const item = document.createElement('li');
-        item.className = 'bg-slate-800 border border-slate-700 rounded p-2';
-        item.textContent = evento;
-        log.prepend(item);
+        prependLogItem('logBatalla', evento, 'bg-slate-800 border border-slate-700 rounded p-2');
     }
 
     function actualizarEstadoCombate(data) {
@@ -217,12 +331,17 @@
             const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
             if (vida && data.vidaRestante !== undefined) {
                 vida.textContent = data.vidaRestante;
+                animateValueChange(vida);
+                animateBattleImpact(vida.closest('[data-anim-card]') || vida, 'rgba(244, 63, 94, 0.55)');
             }
         }
 
         if (data.vidaJugador !== undefined) {
             const vidaJugador = document.querySelector('[data-player-life]');
-            if (vidaJugador) vidaJugador.textContent = data.vidaJugador;
+            if (vidaJugador) {
+                vidaJugador.textContent = data.vidaJugador;
+                animateValueChange(vidaJugador);
+            }
         }
 
         if (data.estadoBatalla) {
@@ -239,6 +358,7 @@
     }
 
     function atacarEnBatalla(personajeId) {
+        const panelBatalla = document.getElementById('panelBatallaJugador');
         const selector = document.getElementById('objetivoBatalla');
         if (!selector || !selector.value) {
             showToast('Selecciona un villano objetivo', false);
@@ -261,8 +381,23 @@
                 return resp.json();
             })
             .then(data => {
-                actualizarEstadoCombate(data);
-                showToast(data.evento, true);
+                const targetCard = document.getElementById(`objetivo_card_villano_${selector.value}`)
+                    || document.getElementById(`vida_villano_${selector.value}`)?.closest('[data-anim-card]');
+                const attackerCard = document.querySelector('[data-anim-panel="player-root"]');
+                const details = data?.danio !== undefined || data?.critico !== undefined
+                    ? { damage: data.danio ?? null, critical: !!data.critico, blocked: !!data.bloqueado }
+                    : parseCombatEventDetails(data?.evento || '');
+
+                animateMeleeExchange({
+                    attacker: attackerCard,
+                    target: targetCard,
+                    scene: panelBatalla || document.querySelector('[data-anim-panel="player-battle"]'),
+                    damage: details.damage,
+                    critical: details.critical,
+                    blocked: details.blocked,
+                    variant: 'sword',
+                    onImpact: () => actualizarEstadoCombate(data)
+                }).then(() => showToast(data.evento, true));
             })
             .catch(err => showToast(err.message || 'No se pudo atacar', false));
     }
@@ -311,10 +446,14 @@
             })
             .then(data => {
                 const energia = document.getElementById('energia');
-                if (energia) energia.textContent = data.energiaRestante;
+                if (energia) {
+                    energia.textContent = data.energiaRestante;
+                    animateValueChange(energia);
+                }
                 if (enBatalla) {
                     actualizarEstadoCombate(data);
                 }
+                animateBattleImpact(panelBatalla || document.getElementById('hechizos'), 'rgba(56, 189, 248, 0.55)');
                 showToast(`${data.nombre} lanzado. PE: ${data.energiaRestante}`, true);
             })
             .catch(err => showToast(err.message || 'Error al lanzar hechizo', false));

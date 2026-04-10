@@ -7,14 +7,19 @@
     Vista del Villano
 </h1>
 
-<div class="max-w-5xl mx-auto bg-slate-900 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${villano != null}">
+<div class="max-w-5xl mx-auto bg-slate-900 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${villano != null}" data-anim-panel="villain-root">
     <div class="mb-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-                <p class="text-xl text-rose-300 font-bold" th:text="${villano.nombre}">Nombre</p>
-                <p class="text-sm text-gray-300">
-                    Nivel <span th:text="${villano.nivel}">1</span> - <span th:text="${villano.tipo}">Villano</span>
-                </p>
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 min-w-0">
+                <div class="shrink-0 overflow-hidden rounded-lg">
+                    <th:block th:replace="~{fragments/media :: heroPortrait(${villano.imagen}, 'Retrato del villano', 'w-auto max-w-full h-52 md:h-72 rounded-lg border-cyan-400/20 shadow-md shadow-cyan-950/20')}"></th:block>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xl text-rose-300 font-bold break-words leading-tight" th:text="${villano.nombre}">Nombre</p>
+                    <p class="text-sm text-gray-300 break-words">
+                        Nivel <span th:text="${villano.nivel}">1</span> - <span th:text="${villano.tipo}">Villano</span>
+                    </p>
+                </div>
             </div>
             <a th:if="${batallaActiva != null}" th:href="@{'/batallas/' + ${batallaActiva.id}}"
                class="bg-red-800 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-lg text-center">
@@ -24,7 +29,8 @@
     </div>
 
     <div id="panelBatallaVillano" th:if="${batallaActiva != null}"
-         class="mb-5 rounded-2xl border border-rose-500/30 bg-gradient-to-r from-slate-950 via-zinc-900 to-slate-950 p-4 shadow-xl shadow-rose-950/20">
+         class="mb-5 rounded-2xl border border-rose-500/30 bg-gradient-to-r from-slate-950 via-zinc-900 to-slate-950 p-4 shadow-xl shadow-rose-950/20"
+         data-anim-panel="villain-battle">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
             <div>
                 <p class="text-lg font-bold text-rose-300">⚔️ Combate actual: <span th:text="${batallaActiva.nombre}">Batalla</span></p>
@@ -35,6 +41,7 @@
             </div>
             <span id="turnoVillanoBadge"
                   class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border"
+                  th:attr="data-turn-indicator=${esTurnoVillano}"
                   th:classappend="${esTurnoVillano} ? ' border-emerald-400 text-emerald-300 bg-emerald-500/10' : ' border-amber-400 text-amber-300 bg-amber-500/10'"
                   th:text="${esTurnoVillano} ? 'Es tu turno' : 'Espera tu turno'">Es tu turno</span>
         </div>
@@ -42,11 +49,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
                 <p class="font-semibold text-cyan-300 mb-2">Objetivos disponibles</p>
-                <select id="objetivoBatallaVillano" class="w-full text-sm px-2 py-2 rounded bg-slate-200 text-slate-900 mb-3">
-                    <option value="">Selecciona un personaje</option>
-                    <option th:each="personaje : ${batallaActiva.personajes}" th:if="${!personaje.derrotado}"
-                            th:value="${personaje.id}" th:text="${personaje.nombre + ' (' + personaje.puntosVida + ' HP)'}">Personaje</option>
-                </select>
+                <input type="hidden" id="objetivoBatallaVillano" value="" />
+                <p class="text-xs text-slate-300 mb-3">
+                    Haz clic en una caja de personaje para seleccionarlo.
+                    <span id="objetivoBatallaVillanoLabel" class="text-cyan-300 font-semibold">Ninguno</span>
+                </p>
 
                 <div class="flex flex-wrap gap-2 mb-3">
                     <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded"
@@ -57,7 +64,12 @@
 
                 <div class="space-y-2">
                     <div th:each="personaje : ${batallaActiva.personajes}"
-                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2">
+                         th:id="${'objetivo_card_personaje_' + personaje.id}"
+                         th:attr="data-objetivo-id=${personaje.id},data-objetivo-nombre=${personaje.nombre},data-objetivo-derrotado=${personaje.derrotado}"
+                         data-anim-card="hero-target"
+                         onclick="seleccionarObjetivoBatallaVillano(this)"
+                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2 transition-all"
+                         th:classappend="${personaje.derrotado} ? ' opacity-60 cursor-not-allowed' : ' cursor-pointer hover:border-cyan-400 hover:bg-slate-700/80'">
                         <div class="flex items-center gap-3">
                             <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-28 h-28 md:w-32 md:h-32 rounded-xl border-cyan-400/30')}"></th:block>
                             <div>
@@ -68,6 +80,7 @@
                         <div class="text-right">
                             <p>HP: <span class="text-amber-300 font-bold" th:id="${'vida_personaje_' + personaje.id}" th:text="${personaje.puntosVida}">0</span></p>
                             <p class="text-[11px] text-slate-400" th:if="${personaje.derrotado}">Derrotado</p>
+                            <p class="text-[11px] text-emerald-300 hidden" th:id="${'objetivo_tag_personaje_' + personaje.id}">Seleccionado</p>
                         </div>
                     </div>
                 </div>
@@ -159,6 +172,74 @@
 
 <script>
 
+    function seleccionarObjetivoBatallaVillano(card) {
+        if (!card || card.dataset.objetivoDerrotado === 'true') {
+            return;
+        }
+
+        const objetivoId = card.dataset.objetivoId;
+        const objetivoNombre = card.dataset.objetivoNombre || 'Objetivo';
+        const input = document.getElementById('objetivoBatallaVillano');
+        const label = document.getElementById('objetivoBatallaVillanoLabel');
+
+        if (input) input.value = objetivoId;
+        if (label) label.textContent = objetivoNombre;
+
+        document.querySelectorAll('[id^="objetivo_card_personaje_"]').forEach(item => {
+            item.classList.remove('border-emerald-400', 'bg-emerald-500/10', 'ring-1', 'ring-emerald-300/30');
+            item.classList.add('border-slate-700');
+        });
+
+        document.querySelectorAll('[id^="objetivo_tag_personaje_"]').forEach(item => item.classList.add('hidden'));
+
+        card.classList.remove('border-slate-700');
+        card.classList.add('border-emerald-400', 'bg-emerald-500/10', 'ring-1', 'ring-emerald-300/30');
+
+        const tag = document.getElementById(`objetivo_tag_personaje_${objetivoId}`);
+        if (tag) tag.classList.remove('hidden');
+
+        animateSelectionCard(card);
+    }
+
+    function obtenerPrimerObjetivoDisponibleVillano() {
+        return Array.from(document.querySelectorAll('[id^="objetivo_card_personaje_"]'))
+            .find(item => item.dataset.objetivoDerrotado !== 'true') || null;
+    }
+
+    function inicializarObjetivoBatallaVillano() {
+        const input = document.getElementById('objetivoBatallaVillano');
+        const label = document.getElementById('objetivoBatallaVillanoLabel');
+        if (!input) {
+            return;
+        }
+
+        const objetivoActual = input.value
+            ? document.getElementById(`objetivo_card_personaje_${input.value}`)
+            : null;
+
+        if (objetivoActual && objetivoActual.dataset.objetivoDerrotado !== 'true') {
+            seleccionarObjetivoBatallaVillano(objetivoActual);
+            return;
+        }
+
+        const primerObjetivo = obtenerPrimerObjetivoDisponibleVillano();
+        if (primerObjetivo) {
+            seleccionarObjetivoBatallaVillano(primerObjetivo);
+            return;
+        }
+
+        input.value = '';
+        if (label) {
+            label.textContent = 'Sin objetivos';
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', inicializarObjetivoBatallaVillano);
+    } else {
+        requestAnimationFrame(inicializarObjetivoBatallaVillano);
+    }
+
     function tirarIniciativa(villanoId) {
         fetch(`/villano/${villanoId}/iniciativa`, { method: 'POST' })
             .then(resp => {
@@ -167,7 +248,10 @@
             })
             .then(data => {
                 const ini = document.getElementById('iniciativaVillano');
-                if (ini) ini.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+                if (ini) {
+                    ini.textContent = `${data.tirada} + ${data.modificador} = ${data.total}`;
+                    animateValueChange(ini);
+                }
                 showToast(`Iniciativa: ${data.total}`, true);
             })
             .catch(() => showToast('No se pudo tirar iniciativa', false));
@@ -204,13 +288,7 @@
     }
 
     function agregarEventoCombate(evento) {
-        const log = document.getElementById('logBatallaVillano');
-        if (!log || !evento) return;
-
-        const item = document.createElement('li');
-        item.className = 'bg-slate-800 border border-slate-700 rounded p-2';
-        item.textContent = evento;
-        log.prepend(item);
+        prependLogItem('logBatallaVillano', evento, 'bg-slate-800 border border-slate-700 rounded p-2');
     }
 
     function actualizarEstadoCombate(data) {
@@ -220,12 +298,25 @@
             const vida = document.getElementById(`vida_${data.objetivoTipo}_${data.objetivoId}`);
             if (vida && data.vidaRestante !== undefined) {
                 vida.textContent = data.vidaRestante;
+                animateValueChange(vida);
+                animateBattleImpact(vida.closest('[data-anim-card]') || vida, 'rgba(56, 189, 248, 0.55)');
+            }
+
+            if (data.objetivoTipo === 'personaje') {
+                const cardObjetivo = document.getElementById(`objetivo_card_personaje_${data.objetivoId}`);
+                if (cardObjetivo && data.derrotado) {
+                    cardObjetivo.dataset.objetivoDerrotado = 'true';
+                    cardObjetivo.classList.add('opacity-60', 'cursor-not-allowed');
+                }
             }
         }
 
         if (data.vidaVillano !== undefined) {
             const vidaVillano = document.querySelector('[data-villain-life]');
-            if (vidaVillano) vidaVillano.textContent = data.vidaVillano;
+            if (vidaVillano) {
+                vidaVillano.textContent = data.vidaVillano;
+                animateValueChange(vidaVillano);
+            }
         }
 
         if (data.estadoBatalla) {
@@ -239,10 +330,25 @@
         }
 
         agregarEventoCombate(data.evento);
+
+        const inputObjetivo = document.getElementById('objetivoBatallaVillano');
+        if (!inputObjetivo || !inputObjetivo.value) {
+            inicializarObjetivoBatallaVillano();
+            return;
+        }
+
+        const cardSeleccionada = document.getElementById(`objetivo_card_personaje_${inputObjetivo.value}`);
+        if (!cardSeleccionada || cardSeleccionada.dataset.objetivoDerrotado === 'true') {
+            inicializarObjetivoBatallaVillano();
+        }
     }
 
     function atacarEnBatalla(villanoId) {
+        const panelBatalla = document.getElementById('panelBatallaVillano');
         const selector = document.getElementById('objetivoBatallaVillano');
+        if (selector && !selector.value) {
+            inicializarObjetivoBatallaVillano();
+        }
         if (!selector || !selector.value) {
             showToast('Selecciona un personaje objetivo', false);
             return;
@@ -264,8 +370,23 @@
                 return resp.json();
             })
             .then(data => {
-                actualizarEstadoCombate(data);
-                showToast(data.evento, true);
+                const targetCard = document.getElementById(`objetivo_card_personaje_${selector.value}`)
+                    || document.getElementById(`vida_personaje_${selector.value}`)?.closest('[data-anim-card]');
+                const attackerCard = document.querySelector('[data-anim-panel="villain-root"]');
+                const details = data?.danio !== undefined || data?.critico !== undefined
+                    ? { damage: data.danio ?? null, critical: !!data.critico, blocked: !!data.bloqueado }
+                    : parseCombatEventDetails(data?.evento || '');
+
+                animateMeleeExchange({
+                    attacker: attackerCard,
+                    target: targetCard,
+                    scene: panelBatalla || document.querySelector('[data-anim-panel="villain-battle"]'),
+                    damage: details.damage,
+                    critical: details.critical,
+                    blocked: details.blocked,
+                    variant: 'axe',
+                    onImpact: () => actualizarEstadoCombate(data)
+                }).then(() => showToast(data.evento, true));
             })
             .catch(err => showToast(err.message || 'No se pudo atacar', false));
     }
@@ -314,10 +435,14 @@
             })
             .then(data => {
                 const energia = document.getElementById('energiaVillano');
-                if (energia) energia.textContent = data.energiaRestante;
+                if (energia) {
+                    energia.textContent = data.energiaRestante;
+                    animateValueChange(energia);
+                }
                 if (enBatalla) {
                     actualizarEstadoCombate(data);
                 }
+                animateBattleImpact(panelBatalla || document.getElementById('hechizosVillano'), 'rgba(244, 63, 94, 0.55)');
                 showToast(`${data.nombre} lanzado. PE: ${data.energiaRestante}`, true);
             })
             .catch(err => showToast(err.message || 'Error al lanzar hechizo', false));

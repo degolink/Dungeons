@@ -10,11 +10,19 @@
         <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" th:id="${'personaje_card_' + personaje.id}" style="border-color: #444; box-shadow: 0 0 10px #000;">
             <div class="mb-3 flex items-start justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-36 h-36 md:w-44 md:h-44 border-yellow-400/30 shadow-lg')}"></th:block>
+                    <button type="button"
+                            class="group relative block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/70"
+                            th:attr="data-modal-open=${'stats_modal_' + personaje.id},aria-label=${'Ver estadísticas de ' + personaje.nombre}">
+                        <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-36 h-36 md:w-44 md:h-44 border-yellow-400/30 shadow-lg')}"></th:block>
+                        <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-slate-950/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-yellow-100 opacity-0 transition group-hover:opacity-100 group-focus:opacity-100">
+                            Ver estadísticas
+                        </span>
+                    </button>
                     <div>
                         <span class="text-xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</span>
                         <span class="text-sm text-gray-400 block">(Nivel <span th:text="${personaje.nivel}">4</span>
                         <span th:text="${personaje.clase}">Mago</span>)</span>
+                        <p class="text-xs text-cyan-200 mt-1">Toca el retrato para abrir la ficha.</p>
                         <a th:href="@{'/jugador/' + ${personaje.id}}"
                            target="_blank"
                            rel="noopener noreferrer"
@@ -24,6 +32,69 @@
                     </div>
                 </div>
                 <button class="text-red-500 hover:text-red-400 text-xs" th:onclick="'eliminarPersonaje(' + ${personaje.id} + ')'">✖</button>
+            </div>
+
+            <div th:id="${'stats_modal_' + personaje.id}" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6" data-modal-root>
+                <div class="absolute inset-0 bg-black/75" th:attr="data-modal-overlay=${'stats_modal_' + personaje.id}"></div>
+                <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-yellow-400/30 bg-slate-950/95 p-4 md:p-6 shadow-2xl shadow-yellow-950/30">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.35em] text-yellow-300">Ficha del aventurero</p>
+                            <h2 class="text-2xl font-bold text-cyan-300" th:text="${personaje.nombre}">Nombre</h2>
+                            <p class="text-sm text-slate-300">
+                                Nivel <span th:text="${personaje.nivel}">1</span> · <span th:text="${personaje.clase}">Aventurero</span>
+                            </p>
+                        </div>
+                        <button type="button"
+                                class="rounded-lg border border-slate-600 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800"
+                                th:attr="data-modal-close=${'stats_modal_' + personaje.id}">✕</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-100">
+                        <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                            <p class="font-semibold text-amber-300">Resumen</p>
+                            <p>Apodo: <span class="text-cyan-200" th:text="${personaje.apodo != null and !#strings.isEmpty(personaje.apodo) ? personaje.apodo : 'Sin apodo'}">Sin apodo</span></p>
+                            <p>Raza: <span class="text-cyan-200" th:text="${personaje.raza != null and !#strings.isEmpty(personaje.raza) ? personaje.raza : 'Desconocida'}">Desconocida</span></p>
+                            <p>Alineamiento: <span class="text-cyan-200" th:text="${personaje.alineamiento != null and !#strings.isEmpty(personaje.alineamiento) ? personaje.alineamiento : 'Neutral'}">Neutral</span></p>
+                            <p>Experiencia: <span class="text-cyan-200" th:text="${personaje.experiencia}">0</span></p>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                            <p class="font-semibold text-emerald-300">Recursos</p>
+                            <p>HP: <span class="text-emerald-300 font-bold" th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
+                            <p>PE: <span class="text-fuchsia-300 font-bold" th:attr="data-energia-personaje=${personaje.id}" th:text="${personaje.puntosEnergia}">0</span></p>
+                            <p>Iniciativa actual: <span class="text-cyan-300" th:text="${personaje.iniciativaActual}">0</span></p>
+                            <p>Orden de turno: <span class="text-cyan-300" th:text="${'#' + personaje.ordenTurno}">#0</span></p>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                            <p class="font-semibold text-purple-300 mb-2">Atributos</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <p>FUE: <span class="text-amber-200" th:text="${personaje.fuerza}">0</span></p>
+                                <p>DES: <span class="text-amber-200" th:text="${personaje.destreza}">0</span></p>
+                                <p>CON: <span class="text-amber-200" th:text="${personaje.constitucion}">0</span></p>
+                                <p>INT: <span class="text-amber-200" th:text="${personaje.inteligencia}">0</span></p>
+                                <p>SAB: <span class="text-amber-200" th:text="${personaje.sabiduria}">0</span></p>
+                                <p>CAR: <span class="text-amber-200" th:text="${personaje.carisma}">0</span></p>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                            <p class="font-semibold text-yellow-300 mb-2">Estados y monedas</p>
+                            <ul class="space-y-1 mb-3 text-xs">
+                                <li th:if="${#lists.isEmpty(personaje.condiciones)}" class="text-slate-400">Sin estados alterados.</li>
+                                <li th:each="condicion : ${personaje.condiciones}">
+                                    <span th:text="${condicion.nombre}">Estado</span>
+                                    <span class="text-cyan-300" th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ' turnos)'}"></span>
+                                </li>
+                            </ul>
+                            <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
+                            <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
+                            <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
+                            <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="space-y-2 text-gray-200">
                          <!-- Estadísticas -->
@@ -38,8 +109,16 @@
 
                     <p>
                         PE:
-                        <span class="font-bold text-fuchsia-300" th:id="${'energia_' + personaje.id}" th:text="${personaje.puntosEnergia}">0</span>
+                        <span class="font-bold text-fuchsia-300" th:id="${'energia_' + personaje.id}" th:attr="data-energia-personaje=${personaje.id}" th:text="${personaje.puntosEnergia}">0</span>
                     </p>
+                    <div class="mt-2 flex items-center gap-2 flex-wrap">
+                        <input type="number" min="0"
+                               th:value="${personaje.puntosEnergia}"
+                               th:id="${'energia_input_' + personaje.id}"
+                               class="w-20 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
+                        <button class="bg-fuchsia-900 hover:bg-fuchsia-800 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'actualizarEnergia(' + ${personaje.id} + ')'">Actualizar PE</button>
+                    </div>
 
                     <p class="mt-2">
                         Iniciativa: 
@@ -176,6 +255,12 @@
                             (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
                             <br>
                             <small th:text="${hechizo.descripcion}" class="text-gray-300">Un proyectil mágico que causa daño.</small>
+                            <div th:if="${hechizo.condiciones != null and !#lists.isEmpty(hechizo.condiciones)}" class="mt-1 text-xs text-cyan-300">
+                                Aplica:
+                                <span th:each="condicion, iter : ${hechizo.condiciones}">
+                                    <span th:text="${condicion.nombre}">Aturdido</span><span th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ' turnos)'}"></span><span th:if="${!iter.last}">, </span>
+                                </span>
+                            </div>
                             <div class="mt-2 flex items-center justify-between gap-2">
                                 <span class="text-xs text-fuchsia-300">Coste estimado: <span th:text="${hechizo.nivel > 0 ? hechizo.nivel : 1}">1</span> PE</span>
                                 <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
@@ -198,6 +283,12 @@
                                class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
                         <input type="number" min="0" placeholder="Duración"
                                th:id="${'spell_duracion_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="text" placeholder="Condición que aplica (opcional)"
+                               th:id="${'spell_condicion_nombre_' + personaje.id}"
+                               class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
+                        <input type="number" min="0" placeholder="Duración de la condición"
+                               th:id="${'spell_condicion_duracion_' + personaje.id}"
                                class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
                         <label class="flex items-center gap-2 text-xs text-gray-200">
                             <input type="checkbox" th:id="${'spell_concentracion_' + personaje.id}" class="bg-gray-600" />
@@ -226,6 +317,7 @@
   <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeDrawer()"></div>
   <div class="relative bg-gray-800 w-full max-w-md h-full p-6 overflow-auto">
       <h2 class="text-xl font-bold mb-4">Crear nuevo personaje</h2>
+      <p class="text-xs text-cyan-200 mb-3">Al guardar, el personaje recibirá y equipará automáticamente un objeto inicial según su clase.</p>
       <form th:action="@{/personaje}" th:object="${newPersonaje}" method="post" class="space-y-3">
           <div class="grid grid-cols-2 gap-2">
               <div>
@@ -242,7 +334,7 @@
               </div>
               <div>
                   <label class="block text-sm text-gray-300">Imagen</label>
-                  <input type="text" th:field="*{imagen}" placeholder="/img/Thorgar.png" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  <input type="text" th:field="*{imagen}" placeholder="/img/Thorgar2.gif" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
               </div>
               <div>
                   <label class="block text-sm text-gray-300">Raza</label>
@@ -294,7 +386,8 @@
               </div>
               <div>
                   <label class="block text-sm text-gray-300">PE</label>
-                  <input type="number" min="0" th:field="*{puntosEnergia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  <input type="number" min="0" th:field="*{puntosEnergia}" placeholder="0 = automático" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  <p class="mt-1 text-[10px] text-cyan-200">Si lo dejas en 0, se calculará automáticamente según la clase y el nivel.</p>
               </div>
               <div>
                   <label class="block text-sm text-gray-300">Cobre</label>
@@ -614,6 +707,8 @@
         const danioInput = document.getElementById(`spell_danio_${personajeId}`);
         const duracionInput = document.getElementById(`spell_duracion_${personajeId}`);
         const descripcionInput = document.getElementById(`spell_descripcion_${personajeId}`);
+        const condicionNombreInput = document.getElementById(`spell_condicion_nombre_${personajeId}`);
+        const condicionDuracionInput = document.getElementById(`spell_condicion_duracion_${personajeId}`);
         const concentracionInput = document.getElementById(`spell_concentracion_${personajeId}`);
 
         if (!nombreInput || !nombreInput.value.trim()) {
@@ -628,6 +723,8 @@
         body.append('danio', danioInput?.value || '0');
         body.append('duracion', duracionInput?.value || '0');
         body.append('descripcion', descripcionInput?.value?.trim() || '');
+        body.append('condicionNombre', condicionNombreInput?.value?.trim() || '');
+        body.append('condicionDuracion', condicionDuracionInput?.value || '0');
         body.append('requiereConcentracion', concentracionInput?.checked ? 'true' : 'false');
 
         fetch(`/personaje/${personajeId}/hechizos`, {
@@ -652,11 +749,16 @@
                 card.className = 'bg-gray-700 rounded p-2 text-sm mb-2';
                 const coste = Math.max(Number(data.nivel) || 0, 1);
                 const descripcion = data.descripcion || 'Sin descripción';
+                const condiciones = Array.isArray(data.condiciones) ? data.condiciones : [];
+                const condicionesHtml = condiciones.length
+                    ? `<div class="mt-1 text-xs text-cyan-300">Aplica: ${condiciones.map(cond => `${cond.nombre}${cond.duracion > 0 ? ` (${cond.duracion} turnos)` : ''}`).join(', ')}</div>`
+                    : '';
                 card.innerHTML = `
                     <span class="font-semibold text-yellow-300">${data.nombre}</span>
                     (Nivel ${data.nivel}) - ${data.tipo}
                     <br>
                     <small class="text-gray-300">${descripcion}</small>
+                    ${condicionesHtml}
                     <div class="mt-2 flex items-center justify-between gap-2">
                         <span class="text-xs text-fuchsia-300">Coste estimado: ${coste} PE</span>
                         <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded" onclick="lanzarHechizo(${personajeId}, ${data.id})">Lanzar</button>
@@ -671,6 +773,8 @@
             if (danioInput) danioInput.value = '';
             if (duracionInput) duracionInput.value = '';
             if (descripcionInput) descripcionInput.value = '';
+            if (condicionNombreInput) condicionNombreInput.value = '';
+            if (condicionDuracionInput) condicionDuracionInput.value = '';
             if (concentracionInput) concentracionInput.checked = false;
             showToast(`Hechizo añadido: ${data.nombre}`, true);
         })
@@ -705,6 +809,42 @@
         .catch(err => {
             console.error(err);
             showToast(err.message || 'Error al lanzar hechizo', false);
+        });
+    }
+
+    function actualizarEnergia(personajeId) {
+        const input = document.getElementById(`energia_input_${personajeId}`);
+        if (!input) return;
+
+        let valor = parseInt(input.value, 10);
+        if (isNaN(valor) || valor < 0) valor = 0;
+
+        const body = new URLSearchParams();
+        body.append('valor', valor);
+
+        fetch(`/personaje/${personajeId}/energia`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al actualizar la energía');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            input.value = data.puntosEnergia;
+            document.querySelectorAll(`[data-energia-personaje="${personajeId}"]`).forEach(item => {
+                item.textContent = data.puntosEnergia;
+            });
+            showToast(`Energía actualizada: ${data.puntosEnergia} PE`, true);
+        })
+        .catch(err => {
+            console.error(err);
+            showToast(err.message || 'Error al actualizar la energía', false);
         });
     }
 

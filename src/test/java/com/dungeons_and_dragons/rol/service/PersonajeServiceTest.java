@@ -101,4 +101,37 @@ class PersonajeServiceTest {
         personajeService.borrar(1L  );
         verify(personajeRepository, times(1)).deleteById(1L);
     }
+
+    @Test
+    void deberiaAsignarEnergiaInicialAlCrearPersonajeSiNoSeIndica() {
+        Personaje personaje = new Personaje();
+        personaje.setNombre("Merlín");
+        personaje.setClase("Mago");
+        personaje.setNivel(3);
+        personaje.setPuntosEnergia(0);
+
+        when(personajeRepository.save(personaje)).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Personaje resultado = personajeService.prepararNuevoPersonaje(personaje);
+
+        assertEquals(24, resultado.getPuntosEnergia());
+        verify(personajeRepository, times(1)).save(personaje);
+    }
+
+    @Test
+    void deberiaAsignarHechizosInicialesAlCrearUnPersonajeNuevo() {
+        Personaje personaje = new Personaje();
+        personaje.setNombre("Kael");
+        personaje.setClase("Mago");
+        personaje.setNivel(2);
+
+        when(personajeRepository.save(personaje)).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Personaje resultado = personajeService.prepararNuevoPersonaje(personaje);
+
+        assertNotNull(resultado.getHechizos());
+        assertFalse(resultado.getHechizos().isEmpty());
+        assertEquals("Bola de Fuego", resultado.getHechizos().get(0).getNombre());
+        verify(personajeRepository, times(1)).save(personaje);
+    }
 }

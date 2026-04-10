@@ -3,6 +3,7 @@ package com.dungeons_and_dragons.rol.controller;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -85,6 +86,19 @@ public class NarradorController {
     public DadosService.ResultadoIniciativa tirarIniciativa(@PathVariable Long id) {
         Personaje personaje = buscarPersonaje(id);
         return dadosService.tirarIniciativa(personaje);
+    }
+
+    @PostMapping("/personaje/{id}/energia")
+    @ResponseBody
+    public Map<String, Object> actualizarEnergia(@PathVariable Long id, @RequestParam Integer valor) {
+        Personaje personaje = buscarPersonaje(id);
+        Personaje actualizado = personajeService.actualizarEnergia(personaje, valor);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", actualizado.getId());
+        response.put("nombre", actualizado.getNombre());
+        response.put("puntosEnergia", actualizado.getPuntosEnergia());
+        return response;
     }
 
     @PostMapping("/personaje/{id}/moneda")
@@ -250,7 +264,10 @@ public class NarradorController {
             @RequestParam(defaultValue = "") String descripcion,
             @RequestParam(name = "danio", defaultValue = "0") Integer danio,
             @RequestParam(defaultValue = "0") Integer duracion,
-            @RequestParam(defaultValue = "false") Boolean requiereConcentracion) {
+            @RequestParam(defaultValue = "false") Boolean requiereConcentracion,
+            @RequestParam(defaultValue = "") String condicionNombre,
+            @RequestParam(defaultValue = "") String condicionDescripcion,
+            @RequestParam(defaultValue = "0") Integer condicionDuracion) {
 
         if (nombre == null || nombre.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del hechizo es obligatorio");
@@ -269,6 +286,15 @@ public class NarradorController {
         hechizo.setDaño(danio == null || danio < 0 ? 0 : danio);
         hechizo.setDuracion(duracion == null || duracion < 0 ? 0 : duracion);
         hechizo.setRequiereConcentracion(Boolean.TRUE.equals(requiereConcentracion));
+
+        if (condicionNombre != null && !condicionNombre.isBlank()) {
+            Condicion condicion = new Condicion();
+            condicion.setNombre(condicionNombre.trim());
+            condicion.setDescripcion(condicionDescripcion == null ? "" : condicionDescripcion.trim());
+            condicion.setDuracion(condicionDuracion == null || condicionDuracion < 0 ? 0 : condicionDuracion);
+            condicion.setHechizoOrigen(hechizo);
+            hechizo.getCondiciones().add(condicion);
+        }
 
         personaje.getHechizos().add(hechizo);
         Personaje actualizado = personajeService.guardar(personaje);
@@ -344,7 +370,8 @@ public class NarradorController {
 
     @PostMapping("/personaje")
     public String crearPersonaje(Personaje personaje) {
-        personajeService.guardar(personaje);
+        Personaje personajeGuardado = personajeService.prepararNuevoPersonaje(personaje);
+        asignarEquipoInicial(personajeGuardado);
         return "redirect:/narrador";
     }
 
@@ -357,6 +384,90 @@ public class NarradorController {
     private Personaje buscarPersonaje(Long id) {
         return personajeService.buscarPorId(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Personaje no encontrado"));
+    }
+
+    private void asignarEquipoInicial(Personaje personaje) {
+        if (personaje == null || personaje.getId() == null) {
+            return;
+        }
+
+        ItemBase equipoInicial = construirEquipoInicial(personaje);
+        ItemBase itemGuardado = itemBaseRepository.save(equipoInicial);
+
+        ItemInventario itemInventario = new ItemInventario();
+        itemInventario.setItemBase(itemGuardado);
+        itemInventario.setPersonaje(personaje);
+        itemInventario.setCantidad(1);
+        itemInventario.setConsumido(false);
+        itemInventario.equipar();
+
+        itemInventarioRepository.save(itemInventario);
+    }
+
+    private ItemBase construirEquipoInicial(Personaje personaje) {
+        String clase = personaje.getClase() == null ? "" : personaje.getClase().trim().toLowerCase(Locale.ROOT);
+
+        return switch (clase) {
+            case "guerrero" -> crearItemBase(
+                    "Espada del Guardián",
+                    "arma",
+                    "Hoja equilibrada para defensores y combatientes de primera línea.",
+                    3.2,
+                    150,
+                    "poco común",
+                    false,
+                    false);
+            case "mago" -> crearItemBase(
+                    "Bastón Arcano",
+                    "arma",
+                    "Canaliza energía mágica y mejora la precisión de los conjuros.",
+                    2.0,
+                    180,
+                    "poco común",
+                    false,
+                    true);
+            case "clérigo" -> crearItemBase(
+                    "Maza Consagrada",
+                    "arma",
+                    "Arma bendecida ideal para guardianes de la fe.",
+                    3.0,
+                    160,
+                    "poco común",
+                    false,
+                    true);
+            case "pícaro", "picaro" -> crearItemBase(
+                    "Daga del Acechador",
+                    "arma",
+                    "Daga ligera pensada para ataques rápidos y precisos.",
+                    1.1,
+                    140,
+                    "poco común",
+                    false,
+                    false);
+            default -> crearItemBase(
+                    "Amuleto del Aventurero",
+                    "accesorio",
+                    "Un amuleto sencillo que acompaña a cualquier héroe en sus primeros pasos.",
+                    0.2,
+                    90,
+                    "comun",
+                    false,
+                    true);
+        };
+    }
+
+    private ItemBase crearItemBase(String nombre, String tipo, String descripcion, double peso, int valorOro,
+            String rareza, boolean apilable, boolean magico) {
+        ItemBase itemBase = new ItemBase();
+        itemBase.setNombre(nombre);
+        itemBase.setTipo(tipo);
+        itemBase.setDescripcion(descripcion);
+        itemBase.setPeso(peso);
+        itemBase.setValorOro(valorOro);
+        itemBase.setRareza(rareza);
+        itemBase.setApilable(apilable);
+        itemBase.setMagico(magico);
+        return itemBase;
     }
 
     private Map<String, Object> actualizarItemInventario(Long id, Consumer<ItemInventario> accion) {
@@ -374,6 +485,8 @@ public class NarradorController {
         response.put("nombre", condicion.getNombre());
         response.put("descripcion", condicion.getDescripcion());
         response.put("duracion", condicion.getDuracion());
+        response.put("hechizoOrigen",
+                condicion.getHechizoOrigen() != null ? condicion.getHechizoOrigen().getNombre() : null);
         return response;
     }
 
@@ -402,6 +515,7 @@ public class NarradorController {
         response.put("danio", hechizo.getDaño());
         response.put("duracion", hechizo.getDuracion());
         response.put("requiereConcentracion", hechizo.isRequiereConcentracion());
+        response.put("condiciones", hechizo.getCondiciones().stream().map(this::construirRespuestaCondicion).toList());
         response.put("costeEnergia", costeEnergia);
         response.put("energiaRestante", personaje.getPuntosEnergia());
         response.put("nombrePersonaje", personaje.getNombre());

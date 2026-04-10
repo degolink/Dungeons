@@ -4,7 +4,7 @@
     <img th:fragment="heroPortrait(imagePath, altText, extraClasses)"
          th:src="${imagePath != null and !#strings.isEmpty(imagePath) ? imagePath : '/img/batalla.gif'}"
          th:alt="${altText}"
-         class="block mx-auto object-contain object-center rounded-2xl border bg-transparent drop-shadow-lg"
+         class="block mx-auto rounded-none border-0 shadow-none bg-transparent object-cover object-center scale-110"
          th:classappend="${extraClasses}" />
 </body>
 </html>
