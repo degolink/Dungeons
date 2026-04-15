@@ -10,7 +10,7 @@
 <div class="max-w-5xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${personaje != null}" data-anim-panel="player-root">
     <div class="mb-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div class="flex items-center gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 min-w-0">
                 <button type="button"
                         data-modal-open="playerStatsModal"
                         aria-label="Ver estadísticas del héroe"
@@ -20,9 +20,9 @@
                         Toca para ver la ficha
                     </span>
                 </button>
-                <div>
-                    <p class="text-xl text-yellow-300 font-bold" th:text="${personaje.nombre}">Nombre</p>
-                    <p class="text-sm text-gray-300">
+                <div class="min-w-0 text-center sm:text-left">
+                    <p class="text-xl text-yellow-300 font-bold break-words" th:text="${personaje.nombre}">Nombre</p>
+                    <p class="text-sm text-gray-300 break-words">
                         Nivel <span th:text="${personaje.nivel}">1</span> - <span th:text="${personaje.clase}">Aventurero</span>
                     </p>
                     <p class="text-xs text-cyan-200 mt-2">Pulsa el retrato para abrir las estadísticas.</p>
@@ -35,65 +35,67 @@
         </div>
     </div>
 
-    <div id="playerStatsModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6" data-modal-root>
+    <div id="playerStatsModal" class="fixed inset-0 z-50 hidden overflow-y-auto" data-modal-root>
         <div class="absolute inset-0 bg-black/75" data-modal-overlay="playerStatsModal"></div>
-        <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-cyan-400/30 bg-slate-950/95 p-4 md:p-6 shadow-2xl shadow-cyan-950/40">
-            <div class="flex items-start justify-between gap-4 mb-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.35em] text-cyan-300">Ficha del héroe</p>
-                    <h2 class="text-2xl font-bold text-yellow-300" th:text="${personaje.nombre}">Nombre</h2>
-                    <p class="text-sm text-slate-300">
-                        Nivel <span th:text="${personaje.nivel}">1</span> · <span th:text="${personaje.clase}">Aventurero</span>
-                    </p>
-                </div>
-                <button type="button" data-modal-close="playerStatsModal"
-                        class="rounded-lg border border-slate-600 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800">
-                    ✕
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-100">
-                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
-                    <p class="font-semibold text-amber-300">Resumen</p>
-                    <p>Apodo: <span class="text-cyan-200" th:text="${personaje.apodo != null and !#strings.isEmpty(personaje.apodo) ? personaje.apodo : 'Sin apodo'}">Sin apodo</span></p>
-                    <p>Raza: <span class="text-cyan-200" th:text="${personaje.raza != null and !#strings.isEmpty(personaje.raza) ? personaje.raza : 'Desconocida'}">Desconocida</span></p>
-                    <p>Alineamiento: <span class="text-cyan-200" th:text="${personaje.alineamiento != null and !#strings.isEmpty(personaje.alineamiento) ? personaje.alineamiento : 'Neutral'}">Neutral</span></p>
-                    <p>Experiencia: <span class="text-cyan-200" th:text="${personaje.experiencia}">0</span></p>
-                </div>
-
-                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
-                    <p class="font-semibold text-emerald-300">Recursos</p>
-                    <p>HP: <span class="text-emerald-300 font-bold" th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
-                    <p>PE: <span class="text-fuchsia-300 font-bold" th:text="${personaje.puntosEnergia}">0</span></p>
-                    <p>Iniciativa actual: <span class="text-cyan-300" th:text="${personaje.iniciativaActual}">0</span></p>
-                    <p>Orden de turno: <span class="text-cyan-300" th:text="${'#' + personaje.ordenTurno}">#0</span></p>
-                </div>
-
-                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
-                    <p class="font-semibold text-purple-300 mb-2">Atributos</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <p>FUE: <span class="text-amber-200" th:text="${personaje.fuerza}">0</span></p>
-                        <p>DES: <span class="text-amber-200" th:text="${personaje.destreza}">0</span></p>
-                        <p>CON: <span class="text-amber-200" th:text="${personaje.constitucion}">0</span></p>
-                        <p>INT: <span class="text-amber-200" th:text="${personaje.inteligencia}">0</span></p>
-                        <p>SAB: <span class="text-amber-200" th:text="${personaje.sabiduria}">0</span></p>
-                        <p>CAR: <span class="text-amber-200" th:text="${personaje.carisma}">0</span></p>
+        <div class="relative flex min-h-[100dvh] items-start justify-center px-3 pt-8 pb-4 sm:px-4 sm:pt-10">
+            <div data-modal-panel class="origin-top w-full max-w-3xl mx-auto max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl border border-cyan-400/30 bg-slate-950/95 p-4 md:p-6 shadow-2xl shadow-cyan-950/40">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.35em] text-cyan-300">Ficha del héroe</p>
+                        <h2 class="text-xl sm:text-2xl font-bold text-yellow-300 break-words" th:text="${personaje.nombre}">Nombre</h2>
+                        <p class="text-sm text-slate-300 break-words">
+                            Nivel <span th:text="${personaje.nivel}">1</span> · <span th:text="${personaje.clase}">Aventurero</span>
+                        </p>
                     </div>
+                    <button type="button" data-modal-close="playerStatsModal"
+                            class="shrink-0 rounded-lg border border-slate-600 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800">
+                        ✕
+                    </button>
                 </div>
 
-                <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
-                    <p class="font-semibold text-yellow-300 mb-2">Estados y monedas</p>
-                    <ul class="space-y-1 mb-3 text-xs">
-                        <li th:if="${#lists.isEmpty(personaje.condiciones)}" class="text-slate-400">Sin estados alterados.</li>
-                        <li th:each="condicion : ${personaje.condiciones}">
-                            <span th:text="${condicion.nombre}">Estado</span>
-                            <span class="text-cyan-300" th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
-                        </li>
-                    </ul>
-                    <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
-                    <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
-                    <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
-                    <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-100">
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                        <p class="font-semibold text-amber-300">Resumen</p>
+                        <p>Apodo: <span class="text-cyan-200" th:text="${personaje.apodo != null and !#strings.isEmpty(personaje.apodo) ? personaje.apodo : 'Sin apodo'}">Sin apodo</span></p>
+                        <p>Raza: <span class="text-cyan-200" th:text="${personaje.raza != null and !#strings.isEmpty(personaje.raza) ? personaje.raza : 'Desconocida'}">Desconocida</span></p>
+                        <p>Alineamiento: <span class="text-cyan-200" th:text="${personaje.alineamiento != null and !#strings.isEmpty(personaje.alineamiento) ? personaje.alineamiento : 'Neutral'}">Neutral</span></p>
+                        <p>Experiencia: <span class="text-cyan-200" th:text="${personaje.experiencia}">0</span></p>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3 space-y-2">
+                        <p class="font-semibold text-emerald-300">Recursos</p>
+                        <p>HP: <span class="text-emerald-300 font-bold" th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
+                        <p>PE: <span class="text-fuchsia-300 font-bold" th:text="${personaje.puntosEnergia}">0</span></p>
+                        <p>Iniciativa actual: <span class="text-cyan-300" th:text="${personaje.iniciativaActual}">0</span></p>
+                        <p>Orden de turno: <span class="text-cyan-300" th:text="${'#' + personaje.ordenTurno}">#0</span></p>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                        <p class="font-semibold text-purple-300 mb-2">Atributos</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <p>FUE: <span class="text-amber-200" th:text="${personaje.fuerza}">0</span></p>
+                            <p>DES: <span class="text-amber-200" th:text="${personaje.destreza}">0</span></p>
+                            <p>CON: <span class="text-amber-200" th:text="${personaje.constitucion}">0</span></p>
+                            <p>INT: <span class="text-amber-200" th:text="${personaje.inteligencia}">0</span></p>
+                            <p>SAB: <span class="text-amber-200" th:text="${personaje.sabiduria}">0</span></p>
+                            <p>CAR: <span class="text-amber-200" th:text="${personaje.carisma}">0</span></p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-3">
+                        <p class="font-semibold text-yellow-300 mb-2">Estados y monedas</p>
+                        <ul class="space-y-1 mb-3 text-xs">
+                            <li th:if="${#lists.isEmpty(personaje.condiciones)}" class="text-slate-400">Sin estados alterados.</li>
+                            <li th:each="condicion : ${personaje.condiciones}">
+                                <span th:text="${condicion.nombre}">Estado</span>
+                                <span class="text-cyan-300" th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
+                            </li>
+                        </ul>
+                        <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
+                        <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
+                        <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
+                        <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -115,6 +117,41 @@
                   th:attr="data-turn-indicator=${esTurnoJugador}"
                   th:classappend="${esTurnoJugador} ? ' border-emerald-400 text-emerald-300 bg-emerald-500/10' : ' border-amber-400 text-amber-300 bg-amber-500/10'"
                   th:text="${esTurnoJugador} ? 'Es tu turno' : 'Espera tu turno'">Es tu turno</span>
+        </div>
+
+        <div class="mb-5 pb-4 border-b border-cyan-500/20">
+            <div class="mb-3">
+                <p class="text-xs uppercase tracking-[0.35em] text-cyan-300 mb-2">📊 Estado del héroe</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div class="bg-slate-700 rounded p-3 border border-slate-600">
+                    <p>HP: <span class="text-amber-300 font-bold" data-player-life th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
+                    <p>PE: <span class="text-fuchsia-300 font-bold" id="energia" th:text="${personaje.puntosEnergia}">0</span></p>
+                    <p>Iniciativa: <span class="text-cyan-300" id="iniciativa">-</span></p>
+                    <button class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                            th:onclick="'tirarIniciativa(' + ${personaje.id} + ')'">Tirar iniciativa</button>
+                </div>
+
+                <div class="bg-slate-700 rounded p-3 border border-slate-600">
+                    <p class="font-semibold text-yellow-300 mb-1">Monedas</p>
+                    <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
+                    <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
+                    <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
+                    <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
+                </div>
+
+                <div class="bg-slate-700 rounded p-3 border border-slate-600">
+                    <p class="font-semibold text-yellow-300 mb-1">Estados</p>
+                    <ul id="condiciones" class="space-y-1 text-xs">
+                        <li th:if="${#lists.isEmpty(personaje.condiciones)}" class="text-slate-400">Sin estados alterados.</li>
+                        <li th:each="condicion : ${personaje.condiciones}" th:id="${'condicion_' + condicion.id}">
+                            <span th:text="${condicion.nombre}">Estado</span>
+                            <span th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -139,55 +176,47 @@
                          th:attr="data-objetivo-id=${villano.id},data-objetivo-nombre=${villano.nombre},data-objetivo-derrotado=${villano.derrotado}"
                          data-anim-card="enemy-target"
                          onclick="seleccionarObjetivoBatalla(this)"
-                         class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm flex items-center justify-between gap-2 transition-all"
+                         class="rounded-lg border border-slate-700 bg-slate-800 text-sm transition-all overflow-hidden"
                          th:classappend="${villano.derrotado} ? ' opacity-60 cursor-not-allowed' : ' cursor-pointer hover:border-rose-400 hover:bg-slate-700/80'">
-                        <div>
-                            <p class="text-rose-300 font-semibold" th:text="${villano.nombre}">Villano</p>
-                            <p class="text-xs text-slate-400" th:text="${villano.tipo}">Tipo</p>
-                        </div>
-                        <div class="text-right">
-                            <p>HP: <span class="text-rose-300 font-bold" th:id="${'vida_villano_' + villano.id}" th:text="${villano.puntosVida}">0</span></p>
-                            <p class="text-[11px] text-slate-400" th:if="${villano.derrotado}">Derrotado</p>
-                            <p class="text-[11px] text-emerald-300 hidden" th:id="${'objetivo_tag_villano_' + villano.id}">Seleccionado</p>
+                        <div class="relative flex min-h-full items-center justify-center p-3 sm:p-4">
+                            <div class="flex w-full flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+                                <div class="shrink-0 flex justify-center sm:justify-start overflow-hidden rounded-xl">
+                                    <th:block th:replace="~{fragments/media :: heroPortrait(${villano.imagen}, 'Retrato del villano', 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl border-rose-400/30')}"></th:block>
+                                </div>
+                                <div class="min-w-0 flex-1 text-center sm:text-left">
+                                    <p class="text-rose-300 font-semibold break-words leading-tight" th:text="${villano.nombre}">Villano</p>
+                                    <p class="text-xs text-slate-400 break-words" th:text="${villano.tipo}">Tipo</p>
+                                </div>
+                                <div class="min-w-0 rounded-lg border border-slate-700/70 bg-slate-900/60 px-2 py-1 text-center sm:text-right sm:min-w-[88px]">
+                                    <p class="text-[11px] uppercase tracking-wide text-slate-400">Objetivo</p>
+                                    <p>HP: <span class="text-rose-300 font-bold" th:id="${'vida_villano_' + villano.id}" th:text="${villano.puntosVida}">0</span></p>
+                                    <p class="text-[11px] text-slate-400" th:if="${villano.derrotado}">Derrotado</p>
+                                    <p class="text-[11px] text-emerald-300 hidden" th:id="${'objetivo_tag_villano_' + villano.id}">Seleccionado</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
-                <p class="font-semibold text-yellow-300 mb-2">📜 Log de combate</p>
-                <ul id="logBatalla" class="space-y-2 text-sm max-h-64 overflow-y-auto pr-1">
-                    <li th:each="evento : ${batallaActiva.logCombate}" class="bg-slate-800 border border-slate-700 rounded p-2" th:text="${evento}">Evento</li>
-                </ul>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <p class="font-semibold text-yellow-300">✨ Hechizos</p>
+                    <span class="text-[11px] text-slate-400">Acciones mágicas en combate</span>
+                </div>
+                <div id="hechizos" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    <div th:each="hechizo : ${personaje.hechizos}" class="border-b border-slate-600 pb-2 text-sm">
+                        <p>
+                            <span class="text-yellow-200" th:text="${hechizo.nombre}">Hechizo</span>
+                            (Nivel <span th:text="${hechizo.nivel}">1</span>)
+                        </p>
+                        <p class="text-xs text-gray-300" th:text="${hechizo.descripcion}">Descripción</p>
+                        <button class="mt-1 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                                th:onclick="'lanzarHechizo(' + ${personaje.id} + ',' + ${hechizo.id} + ')'"
+                                th:text="${batallaActiva != null ? 'Lanzar en combate' : 'Lanzar'}">Lanzar</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-sm">
-        <div class="bg-slate-700 rounded p-3">
-            <p>HP: <span class="text-amber-300 font-bold" data-player-life th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
-            <p>PE: <span class="text-fuchsia-300 font-bold" id="energia" th:text="${personaje.puntosEnergia}">0</span></p>
-            <p>Iniciativa: <span class="text-cyan-300" id="iniciativa">-</span></p>
-            <button class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
-                    th:onclick="'tirarIniciativa(' + ${personaje.id} + ')'">Tirar iniciativa</button>
-        </div>
-
-        <div class="bg-slate-700 rounded p-3">
-            <p class="font-semibold text-yellow-300 mb-1">Monedas</p>
-            <p>Cobre: <span th:text="${personaje.cobre} ?: 0">0</span></p>
-            <p>Plata: <span th:text="${personaje.plata} ?: 0">0</span></p>
-            <p>Oro: <span th:text="${personaje.oro} ?: 0">0</span></p>
-            <p>Platino: <span th:text="${personaje.platino} ?: 0">0</span></p>
-        </div>
-
-        <div class="bg-slate-700 rounded p-3">
-            <p class="font-semibold text-yellow-300 mb-1">Estados</p>
-            <ul id="condiciones" class="space-y-1 text-xs">
-                <li th:each="condicion : ${personaje.condiciones}" th:id="${'condicion_' + condicion.id}">
-                    <span th:text="${condicion.nombre}">Estado</span>
-                    <span th:if="${condicion.duracion > 0}" th:text="${' (' + condicion.duracion + ')'}"></span>
-                </li>
-            </ul>
         </div>
     </div>
 
@@ -210,20 +239,11 @@
             </div>
         </div>
 
-        <div class="bg-slate-700 rounded p-3">
-            <p class="font-semibold text-yellow-300 mb-2">Hechizos</p>
-            <div id="hechizos" class="space-y-2">
-                <div th:each="hechizo : ${personaje.hechizos}" class="border-b border-slate-600 pb-2 text-sm">
-                    <p>
-                        <span class="text-yellow-200" th:text="${hechizo.nombre}">Hechizo</span>
-                        (Nivel <span th:text="${hechizo.nivel}">1</span>)
-                    </p>
-                    <p class="text-xs text-gray-300" th:text="${hechizo.descripcion}">Descripción</p>
-                    <button class="mt-1 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
-                            th:onclick="'lanzarHechizo(' + ${personaje.id} + ',' + ${hechizo.id} + ')'"
-                            th:text="${batallaActiva != null ? 'Lanzar en combate' : 'Lanzar'}">Lanzar</button>
-                </div>
-            </div>
+        <div class="bg-slate-700 rounded p-3 border border-slate-600">
+            <p class="font-semibold text-yellow-300 mb-2">📜 Log de combate</p>
+            <ul id="logBatalla" class="space-y-2 text-sm max-h-64 overflow-y-auto pr-1">
+                <li th:each="evento : ${batallaActiva.logCombate}" class="bg-slate-800 border border-slate-700 rounded p-2" th:text="${evento}">Evento</li>
+            </ul>
         </div>
     </div>
 </div>

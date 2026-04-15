@@ -490,7 +490,7 @@ function openModalById(modalId) {
     modal.classList.add('flex');
     document.body.classList.add('overflow-hidden');
 
-    const panel = modal.querySelector('.relative');
+    const panel = modal.querySelector('[data-modal-panel]') || modal.querySelector('.relative');
     withAnime(anime => {
         if (!panel) {
             return;
