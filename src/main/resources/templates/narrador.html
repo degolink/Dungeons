@@ -489,58 +489,58 @@
 
       <!-- Tab manual -->
       <div id="villano-tab-manual">
-          <form th:action="@{/villano}" th:object="${newVillano}" method="post" class="space-y-3">
+          <form action="/villano" method="post" class="space-y-3">
               <div class="grid grid-cols-2 gap-2">
                   <div class="col-span-2">
                       <label class="block text-sm text-gray-300">Nombre <span class="text-rose-400">*</span></label>
-                      <input type="text" th:field="*{nombre}" required class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="text" name="nombre" required class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-sm text-gray-300">Tipo / Raza</label>
-                      <input type="text" th:field="*{tipo}" placeholder="bestia, humanoide…" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="text" name="tipo" placeholder="bestia, humanoide…" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-sm text-gray-300">Imagen (URL)</label>
-                      <input type="text" th:field="*{imagen}" placeholder="/img/villano.gif" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="text" name="imagen" placeholder="/img/villano.gif" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-sm text-gray-300">Nivel</label>
-                      <input type="number" min="1" th:field="*{nivel}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="1" name="nivel" value="1" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-sm text-gray-300">PV Máx</label>
-                      <input type="number" min="0" th:field="*{puntosVidaMax}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="puntosVidaMax" value="20" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-sm text-gray-300">PE (0 = automático)</label>
-                      <input type="number" min="0" th:field="*{puntosEnergia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="puntosEnergia" value="0" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
               </div>
               <p class="text-xs text-slate-400 font-semibold mt-2 mb-1">Atributos</p>
               <div class="grid grid-cols-3 gap-2">
                   <div>
                       <label class="block text-xs text-gray-400">FUE</label>
-                      <input type="number" min="0" th:field="*{fuerza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="fuerza" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-xs text-gray-400">DES</label>
-                      <input type="number" min="0" th:field="*{destreza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="destreza" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-xs text-gray-400">CON</label>
-                      <input type="number" min="0" th:field="*{constitucion}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="constitucion" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-xs text-gray-400">INT</label>
-                      <input type="number" min="0" th:field="*{inteligencia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="inteligencia" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-xs text-gray-400">SAB</label>
-                      <input type="number" min="0" th:field="*{sabiduria}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="sabiduria" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
                   <div>
                       <label class="block text-xs text-gray-400">CAR</label>
-                      <input type="number" min="0" th:field="*{carisma}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                      <input type="number" min="0" name="carisma" value="10" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
                   </div>
               </div>
               <div class="flex gap-2 mt-4">

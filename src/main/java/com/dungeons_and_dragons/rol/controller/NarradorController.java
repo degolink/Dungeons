@@ -68,7 +68,6 @@ public class NarradorController {
         model.addAttribute("personajes", personajes);
         model.addAttribute("newPersonaje", new Personaje());
         model.addAttribute("villanos", villanoRepository.findAll());
-        model.addAttribute("newVillano", new Villano());
         return "narrador";
     }
 
