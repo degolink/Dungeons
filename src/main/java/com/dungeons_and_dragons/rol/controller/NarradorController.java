@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,10 +24,13 @@ import com.dungeons_and_dragons.rol.model.Hechizo;
 import com.dungeons_and_dragons.rol.model.ItemBase;
 import com.dungeons_and_dragons.rol.model.ItemInventario;
 import com.dungeons_and_dragons.rol.model.Personaje;
+import com.dungeons_and_dragons.rol.model.Villano;
 import com.dungeons_and_dragons.rol.repository.ItemBaseRepository;
 import com.dungeons_and_dragons.rol.repository.ItemInventarioRepository;
+import com.dungeons_and_dragons.rol.repository.VillanoRepository;
 import com.dungeons_and_dragons.rol.service.BatallaService;
 import com.dungeons_and_dragons.rol.service.DadosService;
+import com.dungeons_and_dragons.rol.service.ItemEquipamentoService;
 import com.dungeons_and_dragons.rol.service.PersonajeService;
 
 @Controller
@@ -39,15 +41,20 @@ public class NarradorController {
     private final ItemInventarioRepository itemInventarioRepository;
     private final ItemBaseRepository itemBaseRepository;
     private final BatallaService batallaService;
+    private final ItemEquipamentoService itemEquipamentoService;
+    private final VillanoRepository villanoRepository;
 
     public NarradorController(PersonajeService personajeService, DadosService dadosService,
             ItemInventarioRepository itemInventarioRepository, ItemBaseRepository itemBaseRepository,
-            BatallaService batallaService) {
+            BatallaService batallaService, ItemEquipamentoService itemEquipamentoService,
+            VillanoRepository villanoRepository) {
         this.personajeService = personajeService;
         this.dadosService = dadosService;
         this.itemInventarioRepository = itemInventarioRepository;
         this.itemBaseRepository = itemBaseRepository;
         this.batallaService = batallaService;
+        this.itemEquipamentoService = itemEquipamentoService;
+        this.villanoRepository = villanoRepository;
     }
 
     @GetMapping("/")
@@ -60,7 +67,8 @@ public class NarradorController {
         List<Personaje> personajes = personajeService.listar();
         model.addAttribute("personajes", personajes);
         model.addAttribute("newPersonaje", new Personaje());
-        System.out.println("Personajes encontrados: " + personajes.size());
+        model.addAttribute("villanos", villanoRepository.findAll());
+        model.addAttribute("newVillano", new Villano());
         return "narrador";
     }
 
@@ -73,12 +81,6 @@ public class NarradorController {
         model.addAttribute("batallaActiva", batallaActiva);
         model.addAttribute("esTurnoJugador", batallaActiva != null && personaje.isTurnoActual() && !personaje.isDerrotado());
         return "jugador";
-    }
-
-    @PostMapping("addData")
-    public String postMethodName(@RequestBody String entity) {
-        personajeService.guardar(new Personaje());
-        return entity;
     }
 
     @PostMapping("/personaje/{id}/iniciativa")
@@ -147,23 +149,24 @@ public class NarradorController {
     @PostMapping("/inventario/{id}/equipar")
     @ResponseBody
     public Map<String, Object> equiparItem(@PathVariable Long id) {
-        return actualizarItemInventario(id, ItemInventario::equipar);
+        ItemInventario item = buscarItemInventario(id);
+        return construirRespuestaItemInventario(itemEquipamentoService.equipar(item));
     }
 
     @PostMapping("/inventario/{id}/desequipar")
     @ResponseBody
     public Map<String, Object> desequiparItem(@PathVariable Long id) {
-        return actualizarItemInventario(id, ItemInventario::desequipar);
+        ItemInventario item = buscarItemInventario(id);
+        return construirRespuestaItemInventario(itemEquipamentoService.desequipar(item));
     }
 
     @DeleteMapping("/inventario/{id}")
     @ResponseBody
     public Map<String, Object> eliminarItemInventario(@PathVariable Long id) {
-        ItemInventario itemInventario = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item no encontrado"));
+        ItemInventario itemInventario = buscarItemInventario(id);
 
         Map<String, Object> response = construirRespuestaItemInventario(itemInventario);
-        itemInventarioRepository.delete(itemInventario);
+        itemEquipamentoService.eliminar(itemInventario);
         return response;
     }
 
@@ -193,6 +196,8 @@ public class NarradorController {
         itemBase.setRareza("comun");
         itemBase.setApilable(Boolean.TRUE.equals(apilable));
         itemBase.setMagico(Boolean.TRUE.equals(magico));
+        itemBase.setEquipable(esTipoEquipable(itemBase.getTipo()));
+        itemBase.setSlotEquipamento(deducirSlot(itemBase.getTipo()));
 
         ItemBase itemBaseGuardado = itemBaseRepository.save(itemBase);
 
@@ -381,6 +386,38 @@ public class NarradorController {
         personajeService.borrar(id);
     }
 
+    @PostMapping("/villano")
+    public String crearVillano(Villano villano) {
+        if (villano.getPuntosVidaMax() > 0 && villano.getPuntosVida() == 0) {
+            villano.setPuntosVida(villano.getPuntosVidaMax());
+        }
+        villano.setFuerzaBase(villano.getFuerza());
+        villano.setDestrezaBase(villano.getDestreza());
+        villano.setConstitucionBase(villano.getConstitucion());
+        villano.setInteligenciaBase(villano.getInteligencia());
+        villano.setSabiduriaBase(villano.getSabiduria());
+        villano.setCarismaBase(villano.getCarisma());
+        villano.setPuntosVidaMaxBase(villano.getPuntosVidaMax());
+        int energia = villano.getPuntosEnergia() > 0 ? villano.getPuntosEnergia()
+                : Math.max(1, villano.getPuntosVidaMax() / 2);
+        villano.setPuntosEnergia(energia);
+        villano.setPuntosEnergiaBase(energia);
+        villanoRepository.save(villano);
+        return "redirect:/narrador";
+    }
+
+    @DeleteMapping("/villano/{id}")
+    @ResponseBody
+    public Map<String, Object> borrarVillano(@PathVariable Long id) {
+        Villano villano = villanoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Villano no encontrado"));
+        villanoRepository.delete(villano);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", id);
+        response.put("nombre", villano.getNombre());
+        return response;
+    }
+
     private Personaje buscarPersonaje(Long id) {
         return personajeService.buscarPorId(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Personaje no encontrado"));
@@ -399,9 +436,10 @@ public class NarradorController {
         itemInventario.setPersonaje(personaje);
         itemInventario.setCantidad(1);
         itemInventario.setConsumido(false);
-        itemInventario.equipar();
+        itemInventario.setEquipado(true);
 
-        itemInventarioRepository.save(itemInventario);
+        ItemInventario guardado = itemInventarioRepository.save(itemInventario);
+        itemEquipamentoService.equipar(guardado);
     }
 
     private ItemBase construirEquipoInicial(Personaje personaje) {
@@ -416,7 +454,15 @@ public class NarradorController {
                     150,
                     "poco común",
                     false,
-                    false);
+                    false,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    12,
+                    0);
             case "mago" -> crearItemBase(
                     "Bastón Arcano",
                     "arma",
@@ -425,7 +471,15 @@ public class NarradorController {
                     180,
                     "poco común",
                     false,
-                    true);
+                    true,
+                    0,
+                    0,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    10);
             case "clérigo" -> crearItemBase(
                     "Maza Consagrada",
                     "arma",
@@ -434,7 +488,15 @@ public class NarradorController {
                     160,
                     "poco común",
                     false,
-                    true);
+                    true,
+                    1,
+                    0,
+                    1,
+                    0,
+                    1,
+                    0,
+                    8,
+                    6);
             case "pícaro", "picaro" -> crearItemBase(
                     "Daga del Acechador",
                     "arma",
@@ -443,7 +505,15 @@ public class NarradorController {
                     140,
                     "poco común",
                     false,
-                    false);
+                    false,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    6,
+                    0);
             default -> crearItemBase(
                     "Amuleto del Aventurero",
                     "accesorio",
@@ -452,12 +522,22 @@ public class NarradorController {
                     90,
                     "comun",
                     false,
-                    true);
+                    true,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    5,
+                    4);
         };
     }
 
     private ItemBase crearItemBase(String nombre, String tipo, String descripcion, double peso, int valorOro,
-            String rareza, boolean apilable, boolean magico) {
+            String rareza, boolean apilable, boolean magico, int bonusFuerza, int bonusDestreza,
+            int bonusConstitucion, int bonusInteligencia, int bonusSabiduria, int bonusCarisma,
+            int bonusVida, int bonusEnergia) {
         ItemBase itemBase = new ItemBase();
         itemBase.setNombre(nombre);
         itemBase.setTipo(tipo);
@@ -467,12 +547,21 @@ public class NarradorController {
         itemBase.setRareza(rareza);
         itemBase.setApilable(apilable);
         itemBase.setMagico(magico);
+        itemBase.setEquipable(esTipoEquipable(tipo));
+        itemBase.setSlotEquipamento(deducirSlot(tipo));
+        itemBase.setBonusFuerza(bonusFuerza);
+        itemBase.setBonusDestreza(bonusDestreza);
+        itemBase.setBonusConstitucion(bonusConstitucion);
+        itemBase.setBonusInteligencia(bonusInteligencia);
+        itemBase.setBonusSabiduria(bonusSabiduria);
+        itemBase.setBonusCarisma(bonusCarisma);
+        itemBase.setBonusVida(bonusVida);
+        itemBase.setBonusEnergia(bonusEnergia);
         return itemBase;
     }
 
     private Map<String, Object> actualizarItemInventario(Long id, Consumer<ItemInventario> accion) {
-        ItemInventario item = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item no encontrado"));
+        ItemInventario item = buscarItemInventario(id);
 
         accion.accept(item);
         ItemInventario actualizado = itemInventarioRepository.save(item);
@@ -501,7 +590,45 @@ public class NarradorController {
         response.put("consumido", itemInventario.isConsumido());
         response.put("apilable", itemInventario.getItemBase() != null && itemInventario.getItemBase().isApilable());
         response.put("magico", itemInventario.getItemBase() != null && itemInventario.getItemBase().isMagico());
+        response.put("equipable", itemInventario.getItemBase() != null && itemInventario.getItemBase().isEquipable());
+        response.put("slotEquipamento",
+                itemInventario.getItemBase() != null ? itemInventario.getItemBase().getSlotEquipamento() : null);
+        response.put("bonusFuerza", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusFuerza() : 0);
+        response.put("bonusDestreza", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusDestreza() : 0);
+        response.put("bonusConstitucion", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusConstitucion() : 0);
+        response.put("bonusInteligencia", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusInteligencia() : 0);
+        response.put("bonusSabiduria", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusSabiduria() : 0);
+        response.put("bonusCarisma", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusCarisma() : 0);
+        response.put("bonusVida", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusVida() : 0);
+        response.put("bonusEnergia", itemInventario.getItemBase() != null ? itemInventario.getItemBase().getBonusEnergia() : 0);
         return response;
+    }
+
+    private ItemInventario buscarItemInventario(Long id) {
+        return itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item no encontrado"));
+    }
+
+    private boolean esTipoEquipable(String tipo) {
+        String valor = tipo == null ? "" : tipo.trim().toLowerCase(Locale.ROOT);
+        return switch (valor) {
+            case "arma", "armadura", "escudo", "casco", "botas", "anillo", "amuleto", "accesorio" -> true;
+            default -> false;
+        };
+    }
+
+    private String deducirSlot(String tipo) {
+        String valor = tipo == null ? "" : tipo.trim().toLowerCase(Locale.ROOT);
+        return switch (valor) {
+            case "arma" -> "arma";
+            case "armadura" -> "armadura";
+            case "escudo" -> "escudo";
+            case "casco" -> "casco";
+            case "botas" -> "botas";
+            case "anillo" -> "anillo";
+            case "amuleto", "accesorio" -> "accesorio";
+            default -> valor.isBlank() ? "miscelaneo" : valor;
+        };
     }
 
     private Map<String, Object> construirRespuestaHechizo(Personaje personaje, Hechizo hechizo, int costeEnergia) {

@@ -3,6 +3,7 @@ package com.dungeons_and_dragons.rol.controller;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.dungeons_and_dragons.rol.model.Batalla;
 import com.dungeons_and_dragons.rol.service.BatallaService;
@@ -31,14 +33,18 @@ public class BatallaController {
 
     @GetMapping("/batallas/{id}")
     public String mostrarBatalla(@PathVariable Long id, Model model) {
-        model.addAttribute("batalla", batallaService.buscarPorId(id));
+        try {
+            model.addAttribute("batalla", batallaService.buscarPorId(id));
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        }
         return "batalla";
     }
 
     @PostMapping("/batallas/{id}/iniciar")
     @ResponseBody
     public Map<String, Object> iniciarBatalla(@PathVariable Long id) {
-        Batalla batalla = batallaService.iniciarBatalla(id);
+        Batalla batalla = obtenerBatalla(() -> batallaService.iniciarBatalla(id));
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", batalla.getId());
         response.put("estado", batalla.getEstado());
@@ -50,7 +56,7 @@ public class BatallaController {
     @PostMapping("/batallas/{id}/reiniciar")
     @ResponseBody
     public Map<String, Object> reiniciarBatalla(@PathVariable Long id) {
-        Batalla batalla = batallaService.reiniciarBatalla(id);
+        Batalla batalla = obtenerBatalla(() -> batallaService.reiniciarBatalla(id));
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", batalla.getId());
         response.put("estado", batalla.getEstado());
@@ -73,12 +79,20 @@ public class BatallaController {
     @PostMapping("/batallas/{id}/turno/siguiente")
     @ResponseBody
     public Map<String, Object> siguienteTurno(@PathVariable Long id) {
-        Batalla batalla = batallaService.siguienteTurno(id);
+        Batalla batalla = obtenerBatalla(() -> batallaService.siguienteTurno(id));
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", batalla.getId());
         response.put("estado", batalla.getEstado());
         response.put("rondaActual", batalla.getRondaActual());
         response.put("mensaje", "Turno actualizado");
         return response;
+    }
+
+    private Batalla obtenerBatalla(java.util.function.Supplier<Batalla> operacion) {
+        try {
+            return operacion.get();
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        }
     }
 }

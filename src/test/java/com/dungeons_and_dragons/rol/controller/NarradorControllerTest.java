@@ -23,8 +23,10 @@ import com.dungeons_and_dragons.rol.model.ItemInventario;
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.repository.ItemBaseRepository;
 import com.dungeons_and_dragons.rol.repository.ItemInventarioRepository;
+import com.dungeons_and_dragons.rol.repository.VillanoRepository;
 import com.dungeons_and_dragons.rol.service.BatallaService;
 import com.dungeons_and_dragons.rol.service.DadosService;
+import com.dungeons_and_dragons.rol.service.ItemEquipamentoService;
 import com.dungeons_and_dragons.rol.service.PersonajeService;
 
 class NarradorControllerTest {
@@ -44,12 +46,18 @@ class NarradorControllerTest {
     @Mock
     private BatallaService batallaService;
 
+    @Mock
+    private ItemEquipamentoService itemEquipamentoService;
+
+    @Mock
+    private VillanoRepository villanoRepository;
+
     private NarradorController narradorController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        narradorController = new NarradorController(personajeService, dadosService, itemInventarioRepository, itemBaseRepository, batallaService);
+        narradorController = new NarradorController(personajeService, dadosService, itemInventarioRepository, itemBaseRepository, batallaService, itemEquipamentoService, villanoRepository);
     }
 
     @Test

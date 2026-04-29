@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Acceso al Reino')}"></head>
+<body data-view="login" class="min-h-screen bg-gradient-to-br from-zinc-950 via-slate-950 to-black text-gray-100">
+    <main class="min-h-screen px-4 py-8 md:px-6 md:py-10 flex items-center justify-center">
+        <div data-anim-page class="w-full max-w-6xl rounded-3xl border border-slate-700/80 bg-slate-900/85 shadow-2xl shadow-red-950/30 backdrop-blur-sm overflow-hidden">
+            <div class="grid lg:grid-cols-[1.15fr_0.85fr]">
+                <section data-anim-hero class="relative border-b lg:border-b-0 lg:border-r border-slate-700/80 p-6 md:p-8 lg:p-10">
+                    <div class="absolute inset-0 bg-gradient-to-br from-red-950/25 via-transparent to-cyan-950/20 pointer-events-none"></div>
+                    <div class="relative h-full flex flex-col justify-between gap-8">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.35em] text-red-300 mb-4">Portal de batalla</p>
+                            <h1 class="text-2xl md:text-4xl text-amber-200 leading-relaxed"
+                                style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 12px rgba(252, 211, 77, 0.35);">
+                                Inicia tu aventura
+                            </h1>
+                            <p class="mt-6 max-w-xl text-sm md:text-base text-slate-300 leading-7">
+                                Entra al tablero del narrador o a la arena de los jugadores con la misma estetica
+                                oscura, fantastica y tactica de la vista de batalla.
+                            </p>
+                        </div>
+
+                        <div data-anim-panel="login-showcase" class="rounded-2xl border border-red-400/20 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-4 md:p-5 shadow-xl">
+                            <img th:src="@{/img/batalla.gif}" src="/img/batalla.gif" alt="Escena de batalla"
+                                 class="w-full h-56 md:h-72 object-cover object-center rounded-2xl border border-red-400/30 shadow-2xl shadow-red-950/30">
+
+                            <div class="mt-4 grid gap-3 md:grid-cols-3 text-sm">
+                                <div data-anim-card="login-feature" class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3 py-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-cyan-300">Rol</p>
+                                    <p class="mt-1 font-semibold text-white">Narrador o jugador</p>
+                                </div>
+                                <div data-anim-card="login-feature" class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-fuchsia-300">Acceso</p>
+                                    <p class="mt-1 font-semibold text-white">Autenticacion segura</p>
+                                </div>
+                                <div data-anim-card="login-feature" class="rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-amber-300">Estado</p>
+                                    <p class="mt-1 font-semibold text-white">Listo para jugar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-anim-panel="login-form-panel" class="p-6 md:p-8 lg:p-10 flex items-center">
+                    <div class="w-full max-w-md mx-auto">
+                        <div data-anim-hero class="mb-6">
+                            <p class="text-xs uppercase tracking-[0.3em] text-cyan-300 mb-3">Acceso</p>
+                            <h2 class="text-2xl md:text-3xl font-bold text-red-200">Login</h2>
+                            <p class="mt-2 text-sm text-slate-400">
+                                Usa tu correo y contrasena para entrar al sistema.
+                            </p>
+                        </div>
+
+                        <div th:if="${error}" data-anim-stagger class="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200 shadow-lg shadow-rose-950/20">
+                            <span th:text="${error}">Email o contrasena incorrectos</span>
+                        </div>
+
+                        <div th:if="${success}" data-anim-stagger class="mb-4 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-lg shadow-emerald-950/20">
+                            <span th:text="${success}">Operacion exitosa</span>
+                        </div>
+
+                        <form th:action="@{/login}" method="post" class="space-y-5">
+                            <div data-anim-stagger>
+                                <label for="email" class="block text-sm font-medium text-slate-200 mb-2">Email</label>
+                                <input type="email"
+                                       id="email"
+                                       name="email"
+                                       required
+                                       autocomplete="username"
+                                       class="w-full rounded-2xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+                                       placeholder="narrador@test.com">
+                            </div>
+
+                            <div data-anim-stagger>
+                                <label for="password" class="block text-sm font-medium text-slate-200 mb-2">Contrasena</label>
+                                <input type="password"
+                                       id="password"
+                                       name="password"
+                                       required
+                                       autocomplete="current-password"
+                                       class="w-full rounded-2xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+                                       placeholder="Ingresa tu contrasena">
+                            </div>
+
+                            <button type="submit"
+                                    data-anim-stagger
+                                    data-anim-hover
+                                    class="w-full rounded-2xl bg-red-800 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400/40">
+                                Iniciar sesion
+                            </button>
+                        </form>
+
+                        <div data-anim-stagger class="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-4 text-sm text-slate-300">
+                            <p>
+                                No tienes cuenta?
+                                <a th:href="@{/registro}" class="font-semibold text-cyan-300 transition hover:text-cyan-200">
+                                    Registrate aqui
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <th:block th:replace="~{fragments/layout :: commonScripts()}"></th:block>
+</body>
+</html>

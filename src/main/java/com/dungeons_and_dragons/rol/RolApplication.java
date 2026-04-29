@@ -9,6 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 import com.dungeons_and_dragons.rol.model.Hechizo;
 import com.dungeons_and_dragons.rol.model.ItemBase;
@@ -16,11 +17,14 @@ import com.dungeons_and_dragons.rol.model.ItemInventario;
 import com.dungeons_and_dragons.rol.model.Personaje;
 import com.dungeons_and_dragons.rol.repository.BatallaRepository;
 import com.dungeons_and_dragons.rol.repository.ItemBaseRepository;
+import com.dungeons_and_dragons.rol.repository.ItemEquipamentoRepository;
 import com.dungeons_and_dragons.rol.repository.ItemInventarioRepository;
 import com.dungeons_and_dragons.rol.repository.PersonajeRepository;
 import com.dungeons_and_dragons.rol.repository.VillanoRepository;
+import com.dungeons_and_dragons.rol.service.ItemEquipamentoService;
 
 @SpringBootApplication
+@ComponentScan(basePackages = {"com.dungeons_and_dragons"})
 public class RolApplication {
 
 	public static void main(String[] args) {
@@ -32,9 +36,12 @@ public class RolApplication {
 			PersonajeRepository personajeRepository,
 			BatallaRepository batallaRepository,
 			ItemInventarioRepository itemInventarioRepository,
+			ItemEquipamentoRepository itemEquipamentoRepository,
 			VillanoRepository villanoRepository,
-			ItemBaseRepository itemBaseRepository) {
+			ItemBaseRepository itemBaseRepository,
+			ItemEquipamentoService itemEquipamentoService) {
 		return args -> {
+			itemEquipamentoRepository.deleteAll();
 			itemInventarioRepository.deleteAll();
 			villanoRepository.deleteAll();
 			batallaRepository.deleteAll();
@@ -53,6 +60,7 @@ public class RolApplication {
 			}
 
 			cargarItemsEpicos(itemBaseRepository, itemInventarioRepository, personajesPorNombre);
+			itemEquipamentoService.sincronizarEquipamentosExistentes();
 		};
 	}
 
@@ -222,6 +230,8 @@ public class RolApplication {
 		itemBase.setRareza(rareza);
 		itemBase.setApilable(apilable);
 		itemBase.setMagico(magico);
+		itemBase.setEquipable(esTipoEquipable(tipo));
+		itemBase.setSlotEquipamento(deducirSlot(tipo));
 		return itemBase;
 	}
 
@@ -233,6 +243,28 @@ public class RolApplication {
 		itemInventario.setEquipado(equipado);
 		itemInventario.setConsumido(false);
 		return itemInventario;
+	}
+
+	private boolean esTipoEquipable(String tipo) {
+		String valor = tipo == null ? "" : tipo.trim().toLowerCase();
+		return switch (valor) {
+			case "arma", "armadura", "escudo", "casco", "botas", "anillo", "amuleto", "accesorio" -> true;
+			default -> false;
+		};
+	}
+
+	private String deducirSlot(String tipo) {
+		String valor = tipo == null ? "" : tipo.trim().toLowerCase();
+		return switch (valor) {
+			case "arma" -> "arma";
+			case "armadura" -> "armadura";
+			case "escudo" -> "escudo";
+			case "casco" -> "casco";
+			case "botas" -> "botas";
+			case "anillo" -> "anillo";
+			case "amuleto", "accesorio" -> "accesorio";
+			default -> valor.isBlank() ? "miscelaneo" : valor;
+		};
 	}
 
 	private List<Hechizo> crearHechizosIniciales(String clase, int nivel) {

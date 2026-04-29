@@ -6,6 +6,241 @@ function withAnime(callback) {
     callback(window.anime);
 }
 
+function prefersReducedMotion() {
+    return typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function shouldAnimate() {
+    return !prefersReducedMotion();
+}
+
+function setAnimationReady(selector) {
+    document.querySelectorAll(selector).forEach(element => {
+        element.style.opacity = '1';
+    });
+}
+
+function animatePageIntro() {
+    const animatedSelectors = [
+        '[data-anim-page]',
+        '[data-anim-hero]',
+        '[data-anim-panel]',
+        '[data-anim-card]',
+        '[data-anim-stagger]'
+    ];
+
+    if (!shouldAnimate()) {
+        animatedSelectors.forEach(setAnimationReady);
+        return;
+    }
+
+    withAnime(anime => {
+        anime({
+            targets: '[data-anim-page]',
+            opacity: [0, 1],
+            translateY: [22, 0],
+            duration: 520,
+            easing: 'easeOutCubic'
+        });
+
+        anime({
+            targets: '[data-anim-hero]',
+            opacity: [0, 1],
+            translateY: [26, 0],
+            scale: [0.98, 1],
+            duration: 560,
+            delay: anime.stagger(90),
+            easing: 'easeOutExpo'
+        });
+
+        anime({
+            targets: '[data-anim-panel]',
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 440,
+            delay: anime.stagger(70, { start: 110 }),
+            easing: 'easeOutQuad'
+        });
+
+        anime({
+            targets: '[data-anim-card]',
+            opacity: [0, 1],
+            translateY: [18, 0],
+            scale: [0.985, 1],
+            duration: 380,
+            delay: anime.stagger(40, { start: 180 }),
+            easing: 'easeOutQuad'
+        });
+
+        anime({
+            targets: '[data-anim-stagger]',
+            opacity: [0, 1],
+            translateY: [12, 0],
+            duration: 300,
+            delay: anime.stagger(55, { start: 220 }),
+            easing: 'easeOutQuad'
+        });
+    });
+}
+
+function animateTurnIndicators() {
+    if (!shouldAnimate()) {
+        return;
+    }
+
+    withAnime(anime => {
+        anime.remove('[data-turn-indicator="true"]');
+        anime({
+            targets: '[data-turn-indicator="true"]',
+            scale: [1, 1.03, 1],
+            duration: 1500,
+            delay: 450,
+            easing: 'easeInOutSine',
+            loop: true
+        });
+    });
+}
+
+function initInteractiveAnimations() {
+    if (!shouldAnimate()) {
+        return;
+    }
+
+    document.querySelectorAll('[data-anim-hover]').forEach(element => {
+        if (element.dataset.animHoverBound === 'true') {
+            return;
+        }
+
+        element.dataset.animHoverBound = 'true';
+
+        element.addEventListener('mouseenter', () => {
+            withAnime(anime => {
+                anime.remove(element);
+                anime({
+                    targets: element,
+                    translateY: -2,
+                    scale: 1.01,
+                    duration: 180,
+                    easing: 'easeOutQuad'
+                });
+            });
+        });
+
+        element.addEventListener('mouseleave', () => {
+            withAnime(anime => {
+                anime.remove(element);
+                anime({
+                    targets: element,
+                    translateY: 0,
+                    scale: 1,
+                    duration: 180,
+                    easing: 'easeOutQuad'
+                });
+            });
+        });
+    });
+}
+
+function openDrawerPanel(drawerId, panelSelector = '[data-drawer-panel]') {
+    const drawer = document.getElementById(drawerId);
+    if (!drawer) {
+        return;
+    }
+
+    drawer.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+
+    if (!shouldAnimate()) {
+        return;
+    }
+
+    const panel = drawer.querySelector(panelSelector);
+    const overlay = drawer.querySelector('[data-drawer-overlay]');
+
+    withAnime(anime => {
+        if (overlay) {
+            anime.remove(overlay);
+            anime({
+                targets: overlay,
+                opacity: [0, 1],
+                duration: 180,
+                easing: 'easeOutQuad'
+            });
+        }
+
+        if (panel) {
+            anime.remove(panel);
+            anime({
+                targets: panel,
+                translateX: [42, 0],
+                opacity: [0.4, 1],
+                duration: 260,
+                easing: 'easeOutCubic'
+            });
+        }
+    });
+}
+
+function closeDrawerPanel(drawerId, panelSelector = '[data-drawer-panel]') {
+    const drawer = document.getElementById(drawerId);
+    if (!drawer) {
+        return;
+    }
+
+    const hideDrawer = () => {
+        drawer.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    };
+
+    if (!shouldAnimate()) {
+        hideDrawer();
+        return;
+    }
+
+    const panel = drawer.querySelector(panelSelector);
+    const overlay = drawer.querySelector('[data-drawer-overlay]');
+
+    let completed = 0;
+    const expected = (panel ? 1 : 0) + (overlay ? 1 : 0) || 1;
+    const done = () => {
+        completed += 1;
+        if (completed >= expected) {
+            hideDrawer();
+        }
+    };
+
+    withAnime(anime => {
+        if (overlay) {
+            anime.remove(overlay);
+            anime({
+                targets: overlay,
+                opacity: [1, 0],
+                duration: 160,
+                easing: 'easeInQuad',
+                complete: done
+            });
+        }
+
+        if (panel) {
+            anime.remove(panel);
+            anime({
+                targets: panel,
+                translateX: [0, 36],
+                opacity: [1, 0.4],
+                duration: 220,
+                easing: 'easeInQuad',
+                complete: done
+            });
+        }
+
+        if (!overlay && !panel) {
+            done();
+        }
+    });
+}
+
 function showToast(message, isSuccess = true, toastId = 'toast') {
     const toast = document.getElementById(toastId);
     if (!toast) {
@@ -449,35 +684,8 @@ function animateMeleeExchange({
 }
 
 function animateCombatEntrance() {
-    withAnime(anime => {
-        anime({
-            targets: '[data-anim-panel]',
-            opacity: [0, 1],
-            translateY: [18, 0],
-            duration: 420,
-            delay: anime.stagger(80),
-            easing: 'easeOutQuad'
-        });
-
-        anime({
-            targets: '[data-anim-card]',
-            opacity: [0, 1],
-            translateY: [20, 0],
-            scale: [0.98, 1],
-            duration: 380,
-            delay: anime.stagger(45, { start: 120 }),
-            easing: 'easeOutQuad'
-        });
-
-        anime({
-            targets: '[data-turn-indicator="true"]',
-            scale: [1, 1.03, 1],
-            duration: 1500,
-            delay: 450,
-            easing: 'easeInOutSine',
-            loop: true
-        });
-    });
+    animatePageIntro();
+    animateTurnIndicators();
 }
 
 function openModalById(modalId) {
@@ -560,4 +768,5 @@ document.addEventListener('keydown', event => {
 
 document.addEventListener('DOMContentLoaded', () => {
     animateCombatEntrance();
+    initInteractiveAnimations();
 });

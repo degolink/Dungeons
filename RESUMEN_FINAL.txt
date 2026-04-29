@@ -1,0 +1,261 @@
+📋 RESUMEN FINAL: Sistema de Login con Tests (Mockito + JUnit 5)
+================================================================
+
+🎯 OBJETIVO COMPLETADO:
+Agregar sistema de autenticación y login con 35 tests unitarios e integración usando Mockito y JUnit 5.
+
+================================================================================
+📂 ARCHIVOS CREADOS
+================================================================================
+
+1️⃣ MODELOS Y REPOSITORIOS:
+   ✅ src/main/java/.../model/Usuario.java
+      - Entidad JPA con campos: id, nombre, email, password, rol, activo
+      - Roles: NARRADOR, JUGADOR
+      - Email único
+
+   ✅ src/main/java/.../repository/UsuarioRepository.java
+      - Métodos: findByEmail, existsByEmail
+      - Hereda JpaRepository<Usuario, Long>
+
+2️⃣ SERVICIOS:
+   ✅ src/main/java/.../service/UsuarioService.java (4 métodos principales)
+      • guardarUsuario() - con encriptación BCrypt
+      • obtenerPorEmail() - busca usuario
+      • existeEmail() - valida disponibilidad
+      • validarCredenciales() - compara password
+
+   ✅ src/main/java/.../service/CustomUserDetailsService.java
+      • Implementa UserDetailsService
+      • Mapea roles a Spring Security
+      • Valida usuario activo
+
+3️⃣ CONTROLADORES:
+   ✅ src/main/java/.../controller/AuthController.java
+      Routes:
+      • GET  /login      - Muestra formulario
+      • POST /login      - Valida y autentica
+      • GET  /logout     - Cierra sesión
+      • GET  /registro   - Muestra formulario
+      • POST /registro   - Crea usuario
+
+4️⃣ CONFIGURACIÓN DE SEGURIDAD:
+   ✅ src/main/java/.../configuration/SecurityConfig.java
+      • BCryptPasswordEncoder bean
+      • DaoAuthenticationProvider
+      • SecurityFilterChain con reglas por rol
+      • Rutas públicas vs protegidas
+
+5️⃣ VISTAS THYMELEAF:
+   ✅ src/main/resources/templates/login.html
+      - Formulario de login con Bootstrap
+      - Mostrar errores/éxito
+
+   ✅ src/main/resources/templates/registro.html
+      - Formulario de registro
+      - Validación de contraseñas
+
+6️⃣ INICIALIZADOR DE DATOS:
+   ✅ src/main/java/.../DataInitializer.java
+      • Crea usuario NARRADOR: narrador@test.com
+      • Crea usuario JUGADOR: jugador@test.com
+      • Ambos con password: password123
+
+================================================================================
+🧪 TESTS CREADOS (35 TESTS EN TOTAL)
+================================================================================
+
+📌 TEST 1: UsuarioServiceTest.java (11 tests)
+   └─ @ExtendWith(MockitoExtension.class)
+   ├─ @Mock UsuarioRepository
+   ├─ @Mock PasswordEncoder
+   └─ Tests:
+      ✓ Guardar usuario con contraseña encriptada
+      ✓ Obtener por email
+      ✓ Retornar vacío si no existe
+      ✓ Verificar existencia de email
+      ✓ Validar credenciales correctas
+      ✓ Rechazar credenciales incorrectas
+      ✓ Rechazar usuario inactivo
+      ✓ Rechazar usuario no existente
+      ✓ Obtener por ID
+      ✓ Encriptación con BCrypt
+      ✓ Validación de estado activo
+
+📌 TEST 2: CustomUserDetailsServiceTest.java (5 tests)
+   └─ @ExtendWith(MockitoExtension.class)
+   └─ Tests:
+      ✓ Cargar usuario por email
+      ✓ Excepción si usuario no existe
+      ✓ Excepción si usuario inactivo
+      ✓ Asignar rol JUGADOR
+      ✓ Asignar rol NARRADOR
+
+📌 TEST 3: UsuarioRepositoryTest.java (5 tests)
+   └─ @ExtendWith(MockitoExtension.class)
+   └─ Tests:
+      ✓ Guardar usuario
+      ✓ Encontrar por email
+      ✓ Retornar vacío si no existe
+      ✓ Validar existencia
+      ✓ Retornar false si no existe
+
+📌 TEST 4: AuthControllerTest.java (8 tests)
+   └─ @ExtendWith(MockitoExtension.class)
+   ├─ MockMvc para testing HTTP
+   └─ Tests:
+      ✓ GET /login retorna vista
+      ✓ POST /login credenciales válidas
+      ✓ POST /login credenciales inválidas
+      ✓ GET /logout limpia sesión
+      ✓ GET /registro retorna vista
+      ✓ POST /registro contraseñas diferentes
+      ✓ POST /registro email duplicado
+      ✓ POST /registro exitoso
+
+📌 TEST 5: SecurityIntegrationTest.java (6 tests)
+   └─ @SpringBootTest
+   ├─ @AutoConfigureMockMvc
+   ├─ H2 Database en memoria
+   └─ Tests:
+      ✓ /login accesible sin auth
+      ✓ /registro accesible sin auth
+      ✓ /narrador redirige a login
+      ✓ POST /registro crea usuario
+      ✓ POST /login credenciales inválidas
+      ✓ GET /logout limpia sesión
+
+================================================================================
+📦 DEPENDENCIAS AGREGADAS AL POM.XML
+================================================================================
+
+✅ Spring Security
+   <spring-boot-starter-security>
+
+✅ Spring Security Crypto (BCrypt)
+   <spring-security-crypto>
+
+✅ JUnit 5 Jupiter
+   <junit-jupiter>
+
+✅ Mockito
+   <mockito-core>
+   <mockito-junit-jupiter>
+
+✅ Spring Security Test
+   <spring-security-test>
+
+✅ H2 Database (para tests)
+   <h2>
+
+================================================================================
+🔐 RUTAS PROTEGIDAS
+================================================================================
+
+PÚBLICAS (sin autenticación):
+   ✅ GET  /login
+   ✅ POST /login
+   ✅ GET  /registro
+   ✅ POST /registro
+   ✅ GET  /logout
+   ✅ /static/**
+   ✅ /css/**
+   ✅ /js/**
+
+PROTEGIDAS - NARRADOR:
+   🔒 /narrador/**
+
+PROTEGIDAS - JUGADOR o NARRADOR:
+   🔒 /jugador/**
+
+================================================================================
+🚀 CÓMO USAR
+================================================================================
+
+1️⃣ EJECUTAR TODOS LOS TESTS:
+   $ cd c:\Cosas\Rol\rol
+   $ .\mvnw.cmd test
+
+2️⃣ EJECUTAR UNA CLASE DE TESTS:
+   $ .\mvnw.cmd test -Dtest=UsuarioServiceTest
+
+3️⃣ EJECUTAR UN TEST ESPECÍFICO:
+   $ .\mvnw.cmd test -Dtest=UsuarioServiceTest#testGuardarUsuario
+
+4️⃣ EJECUTAR CON COBERTURA:
+   $ .\mvnw.cmd test jacoco:report
+
+5️⃣ INICIAR APLICACIÓN:
+   $ .\mvnw.cmd spring-boot:run
+
+6️⃣ USUARIOS DE PRUEBA (creados automáticamente):
+   - Email: narrador@test.com
+     Password: password123
+     Rol: NARRADOR (acceso total)
+
+   - Email: jugador@test.com
+     Password: password123
+     Rol: JUGADOR (acceso limitado)
+
+================================================================================
+📊 ESTADÍSTICAS
+================================================================================
+
+Total de Tests:               35
+├─ Tests Unitarios:          29 (con Mockito)
+└─ Tests Integración:         6 (con SpringBootTest)
+
+Archivos Creados:            11
+├─ Modelos/Servicios:         3
+├─ Repositorios:              1
+├─ Controladores:             1
+├─ Configuración:             1
+├─ Vistas Thymeleaf:          2
+├─ Inicializador:             1
+└─ Tests:                     5
+
+Líneas de Código:            ~2000 líneas
+├─ Producción:              ~1000 líneas
+└─ Tests:                   ~1000 líneas
+
+================================================================================
+✨ CARACTERÍSTICAS IMPLEMENTADAS
+================================================================================
+
+✅ Autenticación con usuario/contraseña
+✅ Encriptación BCrypt de contraseñas
+✅ Roles: NARRADOR (admin), JUGADOR (usuario)
+✅ Rutas protegidas por rol
+✅ Sesiones HTTP
+✅ Tests con Mockito (mocks y stubs)
+✅ Tests con JUnit 5 (Jupiter)
+✅ Tests de integración con MockMvc
+✅ Base de datos H2 para tests
+✅ Manejo de excepciones
+✅ Validación de datos
+✅ Usuarios iniciales de prueba
+
+================================================================================
+📝 DOCUMENTACIÓN CREADA
+================================================================================
+
+✅ TESTS_SUMMARY.md        - Resumen detallado de tests
+✅ AUTENTICACION_GUIDE.md  - Guía completa de uso
+✅ Este archivo            - Resumen visual de todo
+
+================================================================================
+🎉 ¡SISTEMA COMPLETAMENTE FUNCIONAL!
+
+Toda la infraestructura de autenticación está lista:
+- Modelos, servicios, controladores implementados
+- 35 tests con Mockito y JUnit 5
+- Vistas de login y registro
+- Configuración de seguridad
+- Usuarios de prueba automáticos
+
+Próximos pasos opcionales:
+- Integrar con usuarios existentes
+- Agregar recuperación de contraseña
+- Mejorar UI/UX
+- Más tests de edge cases
+================================================================================

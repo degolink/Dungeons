@@ -1,20 +1,17 @@
 package com.dungeons_and_dragons.rol.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Hechizo {
 
     @Id
@@ -29,9 +26,9 @@ public class Hechizo {
     private int duracion;         // Duración en turnos o minutos
 
     private boolean requiereConcentracion; // Si necesita concentración
-
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "hechizoOrigen", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Condicion> condiciones = new ArrayList<>();
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "hechizo_origen_id")
+    @Builder.Default
+    private List<Condicion> condiciones = new java.util.ArrayList<>();
 }

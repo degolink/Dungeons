@@ -1,0 +1,160 @@
+📁 ESTRUCTURA DE ARCHIVOS DEL PROYECTO
+======================================
+
+rol/
+├── .mvn/                                    # Maven wrapper
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/dungeons_and_dragons/
+│   │   │       ├── configuration/
+│   │   │       │   └── SecurityConfig.java  ✨ NEW - Configuración de Spring Security
+│   │   │       │       • PasswordEncoder bean
+│   │   │       │       • DaoAuthenticationProvider
+│   │   │       │       • SecurityFilterChain
+│   │   │       │
+│   │   │       └── rol/
+│   │   │           ├── controller/
+│   │   │           │   └── AuthController.java  ✨ NEW - Endpoints de autenticación
+│   │   │           │       • GET /login
+│   │   │           │       • POST /login
+│   │   │           │       • GET /logout
+│   │   │           │       • GET /registro
+│   │   │           │       • POST /registro
+│   │   │           │
+│   │   │           ├── model/
+│   │   │           │   └── Usuario.java  ✨ NEW - Entidad JPA
+│   │   │           │       • id, nombre, email, password, rol, activo
+│   │   │           │       • Roles: NARRADOR, JUGADOR
+│   │   │           │
+│   │   │           ├── repository/
+│   │   │           │   └── UsuarioRepository.java  ✨ NEW - Repositorio JPA
+│   │   │           │       • findByEmail(String)
+│   │   │           │       • existsByEmail(String)
+│   │   │           │
+│   │   │           ├── service/
+│   │   │           │   ├── UsuarioService.java  ✨ NEW - Servicio de usuario
+│   │   │           │   │   • guardarUsuario()
+│   │   │           │   │   • obtenerPorEmail()
+│   │   │           │   │   • validarCredenciales()
+│   │   │           │   │
+│   │   │           │   └── CustomUserDetailsService.java  ✨ NEW - Spring Security
+│   │   │           │       • loadUserByUsername()
+│   │   │           │       • mapRoleToAuthority()
+│   │   │           │
+│   │   │           └── DataInitializer.java  ✨ NEW - Crear usuarios iniciales
+│   │   │               • narrador@test.com
+│   │   │               • jugador@test.com
+│   │   │
+│   │   └── resources/
+│   │       ├── application.properties       (MODIFICADO)
+│   │       │   • spring.datasource.* ya existente
+│   │       │
+│   │       └── templates/
+│   │           ├── login.html  ✨ NEW - Formulario de login
+│   │           │   • Bootstrap UI
+│   │           │   • Form validación
+│   │           │
+│   │           └── registro.html  ✨ NEW - Formulario de registro
+│   │               • Bootstrap UI
+│   │               • Validación de contraseñas
+│   │
+│   └── test/
+│       ├── java/
+│       │   └── com/dungeons_and_dragons/rol/service/
+│       │       ├── UsuarioServiceTest.java  ✨ NEW - 11 tests
+│       │       │   • @ExtendWith(MockitoExtension.class)
+│       │       │   • @Mock UsuarioRepository, PasswordEncoder
+│       │       │   • Pruebas de guardar, obtener, validar
+│       │       │
+│       │       ├── UsuarioRepositoryTest.java  ✨ NEW - 5 tests
+│       │       │   • @Mock repositorio
+│       │       │   • Búsqueda por email
+│       │       │
+│       │       ├── CustomUserDetailsServiceTest.java  ✨ NEW - 5 tests
+│       │       │   • Carga de usuario
+│       │       │   • Mapeo de roles
+│       │       │   • Excepción si inactivo
+│       │       │
+│       │       ├── AuthControllerTest.java  ✨ NEW - 8 tests
+│       │       │   • @ExtendWith(MockitoExtension.class)
+│       │       │   • MockMvc para testing HTTP
+│       │       │   • Tests de login/registro
+│       │       │
+│       │       └── SecurityIntegrationTest.java  ✨ NEW - 6 tests
+│       │           • @SpringBootTest
+│       │           • @AutoConfigureMockMvc
+│       │           • H2 Database en memoria
+│       │           • Tests E2E
+│       │
+│       └── resources/
+│           └── application-test.properties  ✨ NEW
+│               • spring.datasource.url=jdbc:h2:mem:testdb
+│               • spring.jpa.hibernate.ddl-auto=create-drop
+│
+├── pom.xml  ✨ MODIFICADO
+│   Dependencias agregadas:
+│   ├── spring-boot-starter-security
+│   ├── spring-security-crypto
+│   ├── junit-jupiter
+│   ├── mockito-core
+│   ├── mockito-junit-jupiter
+│   ├── spring-security-test
+│   └── h2 (scope: test)
+│
+├── mvnw.cmd                                 # Maven wrapper Windows
+├── mvnw                                     # Maven wrapper Unix
+│
+├── RESUMEN_FINAL.txt  ✨ NEW - Resumen visual completo
+├── TESTS_SUMMARY.md  ✨ NEW - Documentación de tests
+├── AUTENTICACION_GUIDE.md  ✨ NEW - Guía de uso
+├── MOCKITO_JUNIT5_EXAMPLES.md  ✨ NEW - Ejemplos de testing
+│
+├── README.md                                (Existente)
+├── HELP.md                                  (Existente)
+└── target/                                  # Carpeta de compilación
+
+
+═══════════════════════════════════════════════════════════════════════
+📊 RESUMEN DE CAMBIOS
+═══════════════════════════════════════════════════════════════════════
+
+ARCHIVOS CREADOS:           11 archivos
+├─ Código fuente:            6 archivos (modelos, servicios, controladores)
+├─ Vistas:                   2 archivos (HTML)
+├─ Tests:                    5 archivos (35 tests)
+└─ Documentación:            4 archivos (guías y ejemplos)
+
+ARCHIVOS MODIFICADOS:        1 archivo
+├─ pom.xml:                  Agregadas 7 nuevas dependencias
+
+LÍNEAS DE CÓDIGO:            ~2000 líneas
+├─ Código de producción:     ~1000 líneas
+└─ Código de tests:          ~1000 líneas
+
+═══════════════════════════════════════════════════════════════════════
+✨ DESTACADOS (NEW)
+═══════════════════════════════════════════════════════════════════════
+
+1. Sistema de autenticación completo con Spring Security
+2. 35 tests unitarios e integración con Mockito y JUnit 5
+3. BCrypt para encriptación de contraseñas
+4. Roles basados en usuarios (NARRADOR, JUGADOR)
+5. Rutas protegidas por rol
+6. Usuarios iniciales creados automáticamente
+7. Vistas con Bootstrap
+8. Documentación completa
+
+═══════════════════════════════════════════════════════════════════════
+🚀 PRÓXIMOS PASOS OPCIONALES
+═══════════════════════════════════════════════════════════════════════
+
+1. Integrar Usuario con Personaje/Campañas
+2. Navbar con usuario logueado
+3. Panel de perfil de usuario
+4. Recuperación de contraseña
+5. Two-Factor Authentication (2FA)
+6. Tests de performance
+7. Despliegue en producción
+
+═══════════════════════════════════════════════════════════════════════

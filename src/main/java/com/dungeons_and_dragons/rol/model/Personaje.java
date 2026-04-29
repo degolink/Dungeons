@@ -13,10 +13,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Personaje {
 
     @Id
@@ -41,11 +47,24 @@ public class Personaje {
     private int inteligencia;
     private int sabiduria;
     private int carisma;
+    private Integer fuerzaBase;
+    private Integer destrezaBase;
+    private Integer constitucionBase;
+    private Integer inteligenciaBase;
+    private Integer sabiduriaBase;
+    private Integer carismaBase;
 
     // --- Recursos ---
     private int puntosVida;
     private int puntosVidaMax;
     private int puntosEnergia;
+    private Integer puntosVidaMaxBase;
+    private Integer puntosEnergiaBase;
+
+    // --- Combate (calculado por items equipados) ---
+    private int ataque;
+    private int defensa;
+    private int iniciativaBonus;
 
     @Column(nullable = false)
     private Integer cobre = 0;
@@ -95,17 +114,12 @@ public class Personaje {
         orphanRemoval = true
     )
     @JoinColumn(name = "personaje_id")
-    private List<Objeto> objetos = new ArrayList<>();
-
-
-    @OneToMany(
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    @JoinColumn(name = "personaje_id")
     private List<Condicion> condiciones = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "personaje", fetch = FetchType.LAZY)
     private List<ItemInventario> inventario = new ArrayList<>();
+
+    @OneToMany(mappedBy = "personaje", fetch = FetchType.LAZY)
+    private List<ItemEquipamento> equipamiento = new ArrayList<>();
 }

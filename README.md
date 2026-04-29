@@ -1,5 +1,7 @@
 # 🎲 Rol - Gestor de partidas estilo Dungeons & Dragons
 
+> **Autor:** master
+
 Aplicación web desarrollada con **Spring Boot**, **Thymeleaf** y **MySQL** para gestionar personajes, villanos e interacciones de combate en una ambientación inspirada en **Dungeons & Dragons**.
 
 ## ✨ Características principales
@@ -10,6 +12,9 @@ Aplicación web desarrollada con **Spring Boot**, **Thymeleaf** y **MySQL** para
 - Manejo de **hechizos**, **condiciones** e **inventario**.
 - Tiradas de **iniciativa** y acciones durante el combate.
 - Interfaz web renderizada con **Thymeleaf**.
+- 🔐 **Sistema de autenticación** con login/registro
+- 🌐 **Integración con la D&D 5e API** — importa hechizos y monstruos reales
+- 🧪 **~75 Tests** unitarios y de integración con Mockito y JUnit 5
 
 ## 🛠️ Tecnologías usadas
 
@@ -17,8 +22,11 @@ Aplicación web desarrollada con **Spring Boot**, **Thymeleaf** y **MySQL** para
 - **Spring Boot 4.0.3**
 - **Spring MVC**
 - **Spring Data JPA**
+- **Spring Security** (nuevo)
 - **Thymeleaf**
 - **MySQL**
+- **JUnit 5** (nuevo)
+- **Mockito** (nuevo)
 - **Maven Wrapper** (`mvnw`, `mvnw.cmd`)
 
 ## 📁 Estructura general del proyecto
@@ -28,6 +36,10 @@ src/main/java/com/dungeons_and_dragons/
 ├── configuration/
 └── rol/
     ├── controller/
+    ├── dnd/               ← integración D&D 5e API
+    │   ├── DndApiService.java
+    │   ├── DndApiController.java
+    │   └── dto/
     ├── model/
     ├── repository/
     └── service/
@@ -80,9 +92,14 @@ mvnw.cmd spring-boot:run
 
 Una vez iniciado, abre en el navegador:
 
-- `http://localhost:8080/`
+- `http://localhost:8080/login` (nuevo - página de login)
+- `http://localhost:8080/` 
 - `http://localhost:8080/narrador`
 - `http://localhost:8080/batallas`
+
+**Usuarios de prueba creados automáticamente:**
+- Email: `narrador@test.com` | Password: `password123` (Rol: NARRADOR)
+- Email: `jugador@test.com` | Password: `password123` (Rol: JUGADOR)
 
 ## 🧪 Ejecutar pruebas
 
@@ -98,16 +115,51 @@ mvnw.cmd test
 ./mvnw test
 ```
 
+### Opciones de testing
+
+```bash
+# Ejecutar una clase de test específica
+mvnw.cmd test -Dtest=UsuarioServiceTest
+
+# Ejecutar un método específico
+mvnw.cmd test -Dtest=UsuarioServiceTest#testGuardarUsuario
+
+# Con cobertura de código
+mvnw.cmd test jacoco:report
+```
+
+**Total de tests:** ~75 tests unitarios e integración con Mockito y JUnit 5
+
 ## 🧭 Rutas principales
 
+### Públicas (sin autenticación)
 | Ruta | Descripción |
 |------|-------------|
-| `/` | Redirige a la vista principal del narrador |
-| `/narrador` | Panel principal para gestionar personajes |
-| `/jugador/{id}` | Vista individual de un personaje |
-| `/villano/{id}` | Vista individual de un villano |
-| `/batallas` | Abre o crea una batalla de demostración |
-| `/batallas/{id}` | Muestra el estado de una batalla |
+| `GET /login` | Formulario de login |
+| `POST /login` | Procesar login |
+| `GET /registro` | Formulario de registro |
+| `POST /registro` | Procesar registro |
+| `GET /logout` | Cerrar sesión |
+
+### Protegidas (requieren autenticación)
+| Ruta | Descripción | Rol |
+|------|-------------|-----|
+| `/` | Redirige a la vista principal | Autenticado |
+| `/narrador` | Panel del narrador | NARRADOR |
+| `/jugador/{id}` | Vista de jugador | JUGADOR, NARRADOR |
+| `/villano/{id}` | Vista de villano | NARRADOR |
+| `/batallas` | Gestión de batallas | NARRADOR |
+| `/batallas/{id}` | Batalla específica | NARRADOR |
+
+### API D&D 5e (requieren rol NARRADOR)
+| Ruta | Método | Descripción |
+|------|--------|-------------|
+| `/api/dnd/hechizos` | GET | Lista hechizos disponibles en la D&D 5e API |
+| `/api/dnd/hechizos/{index}` | GET | Detalle de un hechizo (ej: `fireball`) |
+| `/api/dnd/importar/hechizo/{index}` | POST | Importa y guarda el hechizo en la BD |
+| `/api/dnd/monstruos` | GET | Lista monstruos disponibles en la D&D 5e API |
+| `/api/dnd/monstruos/{index}` | GET | Detalle de un monstruo (ej: `aboleth`) |
+| `/api/dnd/importar/monstruo/{index}` | POST | Importa y guarda el monstruo como Villano en la BD |
 
 ## ℹ️ Comportamiento importante
 
@@ -117,12 +169,24 @@ Además, durante el arranque se reinician varios datos en base de datos, por lo 
 
 ## 📌 Posibles mejoras futuras
 
-- Autenticación de usuarios
+- ✅ ~~Autenticación de usuarios~~ (implementado)
+- ✅ ~~Integración D&D 5e API~~ (implementado)
 - Persistencia más segura sin reinicio automático de datos
 - Historial completo de combates
 - Mejoras visuales en la interfaz
 - Despliegue en nube o contenedores
+- Recuperación de contraseña
+- Two-Factor Authentication (2FA)
+- Integración de Usuario con Personajes/Campañas
+
+## 📚 Documentación adicional
+
+- **[RESUMEN_FINAL.txt](RESUMEN_FINAL.txt)** - Resumen visual de todo lo implementado
+- **[AUTENTICACION_GUIDE.md](AUTENTICACION_GUIDE.md)** - Guía completa del sistema de autenticación
+- **[MOCKITO_JUNIT5_EXAMPLES.md](MOCKITO_JUNIT5_EXAMPLES.md)** - Ejemplos de testing con Mockito y JUnit 5
+- **[ESTRUCTURA_ARCHIVOS.txt](ESTRUCTURA_ARCHIVOS.txt)** - Árbol de directorios del proyecto
+- **[TESTS_SUMMARY.md](TESTS_SUMMARY.md)** - Resumen detallado de todos los tests
 
 ---
 
-Si quieres, también puedo dejarte una versión más **profesional para GitHub** o una más **simple para entregar como proyecto escolar**.
+*Proyecto desarrollado por **master** como práctica de Spring Boot, testing y consumo de APIs REST.*

@@ -77,6 +77,15 @@ public class PersonajeService {
         personaje.setPuntosVidaMax(Math.max(0, personaje.getPuntosVidaMax()));
         personaje.setPuntosEnergia(Math.max(0, personaje.getPuntosEnergia()));
 
+        if (personaje.getFuerzaBase() == null) personaje.setFuerzaBase(personaje.getFuerza());
+        if (personaje.getDestrezaBase() == null) personaje.setDestrezaBase(personaje.getDestreza());
+        if (personaje.getConstitucionBase() == null) personaje.setConstitucionBase(personaje.getConstitucion());
+        if (personaje.getInteligenciaBase() == null) personaje.setInteligenciaBase(personaje.getInteligencia());
+        if (personaje.getSabiduriaBase() == null) personaje.setSabiduriaBase(personaje.getSabiduria());
+        if (personaje.getCarismaBase() == null) personaje.setCarismaBase(personaje.getCarisma());
+        if (personaje.getPuntosVidaMaxBase() == null) personaje.setPuntosVidaMaxBase(personaje.getPuntosVidaMax());
+        if (personaje.getPuntosEnergiaBase() == null) personaje.setPuntosEnergiaBase(personaje.getPuntosEnergia());
+
         if (personaje.getCobre() == null) personaje.setCobre(0);
         if (personaje.getPlata() == null) personaje.setPlata(0);
         if (personaje.getOro() == null) personaje.setOro(0);

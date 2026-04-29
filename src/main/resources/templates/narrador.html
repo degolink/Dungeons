@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Pantalla del Narrador')}"></head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 p-4 font-cursive">
+<body data-view="narrador" class="min-h-screen bg-gradient-to-br from-zinc-950 via-slate-950 to-black text-gray-100 p-4 md:p-6">
 
-<h1 class="text-3xl md:text-5xl font-bold text-yellow-300 text-center mt-8 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 5px #ffcc00;">Pantalla del Narrador</h1>
+<h1 data-anim-hero class="text-2xl md:text-4xl text-center text-red-300 mt-4 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 10px #f87171;">
+    Pantalla del Narrador
+</h1>
 
-<div class="flex flex-wrap justify-center gap-4 mx-auto max-w-7xl">
+<div data-anim-page data-anim-panel="narrator-root" class="flex flex-wrap justify-center gap-4 mx-auto max-w-7xl rounded-3xl border border-slate-700/80 bg-slate-900/85 shadow-2xl shadow-red-950/30 backdrop-blur-sm p-4 md:p-6">
     <div class="w-full md:w-5/6 lg:w-4/5 px-2" th:each="personaje : ${personajes}">
-        <div class="bg-gray-800 rounded-lg shadow-lg mb-4 p-4 border-2" th:id="${'personaje_card_' + personaje.id}" style="border-color: #444; box-shadow: 0 0 10px #000;">
+        <div data-anim-card="narrator-character" class="rounded-2xl border border-slate-700 bg-slate-900/70 shadow-xl mb-4 p-4" th:id="${'personaje_card_' + personaje.id}">
             <div class="mb-3 flex items-start justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <button type="button"
+                            data-anim-hover
                             class="group relative block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/70"
                             th:attr="data-modal-open=${'stats_modal_' + personaje.id},aria-label=${'Ver estadísticas de ' + personaje.nombre}">
                         <th:block th:replace="~{fragments/media :: heroPortrait(${personaje.imagen}, 'Retrato del héroe', 'w-36 h-36 md:w-44 md:h-44 border-yellow-400/30 shadow-lg')}"></th:block>
@@ -24,6 +27,7 @@
                         <span th:text="${personaje.clase}">Mago</span>)</span>
                         <p class="text-xs text-cyan-200 mt-1">Toca el retrato para abrir la ficha.</p>
                         <a th:href="@{'/jugador/' + ${personaje.id}}"
+                           data-anim-hover
                            target="_blank"
                            rel="noopener noreferrer"
                            class="inline-block mt-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs py-1 px-3 rounded">
@@ -31,7 +35,7 @@
                         </a>
                     </div>
                 </div>
-                <button class="text-red-500 hover:text-red-400 text-xs" th:onclick="'eliminarPersonaje(' + ${personaje.id} + ')'">✖</button>
+                <button data-anim-hover class="text-red-500 hover:text-red-400 text-xs" th:onclick="'eliminarPersonaje(' + ${personaje.id} + ')'">✖</button>
             </div>
 
             <div th:id="${'stats_modal_' + personaje.id}" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6" data-modal-root>
@@ -46,6 +50,7 @@
                             </p>
                         </div>
                         <button type="button"
+                                data-anim-hover
                                 class="rounded-lg border border-slate-600 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800"
                                 th:attr="data-modal-close=${'stats_modal_' + personaje.id}">✕</button>
                     </div>
@@ -116,7 +121,7 @@
                                th:value="${personaje.puntosEnergia}"
                                th:id="${'energia_input_' + personaje.id}"
                                class="w-20 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="bg-fuchsia-900 hover:bg-fuchsia-800 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="bg-fuchsia-900 hover:bg-fuchsia-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarEnergia(' + ${personaje.id} + ')'">Actualizar PE</button>
                     </div>
 
@@ -126,6 +131,7 @@
                     </p>
 
           <button
+                    data-anim-hover
                     class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
                     th:onclick="'tirarIniciativa(' + ${personaje.id} + ')'">
                     Tirar iniciativa
@@ -141,7 +147,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.cobre} ?: 0" 
                                th:id="${'mon_cobre_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'cobre\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -149,7 +155,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.plata} ?: 0" 
                                th:id="${'mon_plata_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'plata\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -157,7 +163,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.oro} ?: 0" 
                                th:id="${'mon_oro_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'oro\')'">Actualizar</button>
                     </div>
                     <div class="flex items-center">
@@ -165,7 +171,7 @@
                         <input type="number" min="0" step="1" th:value="${personaje.platino} ?: 0" 
                                th:id="${'mon_platino_' + personaje.id}"
                                class="w-16 text-xs p-1 rounded bg-gray-200 text-gray-900 border border-gray-400" />
-                        <button class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="ml-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'actualizarMoneda(' + ${personaje.id} + ',\'platino\')'">Actualizar</button>
                     </div>
                 </div>
@@ -183,7 +189,7 @@
                                 <div th:if="${condicion.descripcion != null and !#strings.isEmpty(condicion.descripcion)}"
                                      th:text="${condicion.descripcion}" class="text-xs text-gray-300 mt-1">Pierde el turno.</div>
                             </div>
-                            <button class="text-red-400 hover:text-red-300 text-xs"
+                            <button data-anim-hover class="text-red-400 hover:text-red-300 text-xs"
                                     th:onclick="'eliminarCondicion(' + ${personaje.id} + ',' + ${condicion.id} + ')'">Quitar</button>
                         </li>
                     </ul>
@@ -198,7 +204,7 @@
                                th:id="${'cond_desc_' + personaje.id}"
                                class="px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs" />
                     </div>
-                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                    <button data-anim-hover class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                             th:onclick="'agregarCondicion(' + ${personaje.id} + ')'">Añadir condición</button>
                 </div>
 
@@ -206,17 +212,17 @@
                 <div class="pb-3 border-b border-gray-600">
                     <p class="text-yellow-300 font-bold mb-2">Inventario</p>
                     <div th:id="${'inventario_' + personaje.id}">
-                        <div th:each="item : ${personaje.inventario}" th:id="${'item_' + item.id}" class="flex justify-between items-center py-1 text-sm">
+                        <div th:each="item : ${personaje.inventario}" th:id="${'item_' + item.id}" data-anim-card="narrator-item" class="flex justify-between items-center py-1 text-sm">
                             <div class="flex-1">
                                 <span th:text="${item.itemBase.nombre}" class="font-medium">Espada Larga</span>
                                 <span class="mx-2">x<span th:id="${'item_cantidad_' + item.id}" th:text="${item.cantidad}">1</span></span>
                                 <span th:id="${'item_estado_' + item.id}" th:text="${item.equipado ? 'Equipado' : ''}" class="text-xs text-green-400"></span>
                             </div>
                             <div class="flex gap-1">
-                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'" >Usar</button>
-                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'" >Equipar</button>
-                                <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'" >Desequipar</button>
-                                <button class="bg-red-900 hover:bg-red-800 text-white text-xs py-1 px-2 rounded" th:onclick="'eliminarItem(' + ${item.id} + ')'" >Eliminar</button>
+                                <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'" >Usar</button>
+                                <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'" >Equipar</button>
+                                <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'" >Desequipar</button>
+                                <button data-anim-hover class="bg-red-900 hover:bg-red-800 text-white text-xs py-1 px-2 rounded" th:onclick="'eliminarItem(' + ${item.id} + ')'" >Eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -242,7 +248,7 @@
                             Mágico
                         </label>
                     </div>
-                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                    <button data-anim-hover class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                             th:onclick="'agregarItemInventario(' + ${personaje.id} + ')'">Añadir ítem</button>
                 </div>
 
@@ -250,7 +256,7 @@
                 <div>
                     <p class="text-yellow-300 font-bold mb-2">Hechizos</p>
                     <div th:id="${'hechizos_' + personaje.id}">
-                        <div th:each="hechizo : ${personaje.hechizos}" th:id="${'spell_' + hechizo.id}" class="bg-gray-700 rounded p-2 text-sm mb-2">
+                        <div th:each="hechizo : ${personaje.hechizos}" th:id="${'spell_' + hechizo.id}" data-anim-card="narrator-spell" class="bg-gray-700 rounded p-2 text-sm mb-2">
                             <span th:text="${hechizo.nombre}" class="font-semibold text-yellow-300">Misil Mágico</span>
                             (Nivel <span th:text="${hechizo.nivel}"></span>) - <span th:text="${hechizo.tipo}"></span>
                             <br>
@@ -263,7 +269,7 @@
                             </div>
                             <div class="mt-2 flex items-center justify-between gap-2">
                                 <span class="text-xs text-fuchsia-300">Coste estimado: <span th:text="${hechizo.nivel > 0 ? hechizo.nivel : 1}">1</span> PE</span>
-                                <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                                <button data-anim-hover class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
                                         th:onclick="'lanzarHechizo(' + ${personaje.id} + ',' + ${hechizo.id} + ')'">Lanzar</button>
                             </div>
                         </div>
@@ -299,7 +305,7 @@
                               th:id="${'spell_descripcion_' + personaje.id}"
                               rows="2"
                               class="mt-2 w-full px-2 py-1 rounded bg-gray-200 text-gray-900 text-xs"></textarea>
-                    <button class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
+                    <button data-anim-hover class="mt-2 bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded"
                             th:onclick="'agregarHechizo(' + ${personaje.id} + ')'">Añadir hechizo</button>
                 </div>
             </div>
@@ -308,14 +314,50 @@
 </div>
 
 <div class="w-full flex justify-center gap-3 mt-6 mb-4 flex-wrap">
-    <button onclick="openDrawer()" class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Nuevo Personaje</button>
-    <a href="/batallas" class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded">Ir a batalla</a>
+    <button data-anim-hover onclick="openDrawer()" class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Nuevo Personaje</button>
+    <button data-anim-hover onclick="openVillanoDrawer()" class="bg-rose-900 hover:bg-rose-800 text-white px-4 py-2 rounded">🦹 Nuevo Villano</button>
+    <a data-anim-hover href="/batallas" class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded">Ir a batalla</a>
+</div>
+
+<!-- Sección de villanos -->
+<div class="w-full md:w-5/6 lg:w-4/5 mx-auto mt-6 mb-4" th:if="${not #lists.isEmpty(villanos)}">
+    <h2 class="text-xl font-bold text-rose-300 mb-3" style="font-family: 'Press Start 2P', cursive; font-size: 0.9rem;">🦹 Villanos</h2>
+    <div class="space-y-3">
+        <div th:each="villano : ${villanos}"
+             th:id="${'villano_card_' + villano.id}"
+             class="rounded-2xl border border-rose-700/40 bg-slate-900/70 shadow-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1 min-w-0">
+                <p class="text-rose-300 font-bold text-lg break-words" th:text="${villano.nombre}">Nombre</p>
+                <p class="text-sm text-gray-400">
+                    Nivel <span th:text="${villano.nivel}">1</span>
+                    <span th:if="${villano.tipo != null and !#strings.isEmpty(villano.tipo)}"> · <span th:text="${villano.tipo}"></span></span>
+                </p>
+                <p class="text-xs text-slate-400 mt-1">
+                    HP: <span class="text-rose-300 font-bold" th:text="${villano.puntosVida}">0</span>/<span th:text="${villano.puntosVidaMax}">0</span>
+                    &nbsp;|&nbsp; FUE <span th:text="${villano.fuerza}">0</span>
+                    &nbsp; DES <span th:text="${villano.destreza}">0</span>
+                    &nbsp; CON <span th:text="${villano.constitucion}">0</span>
+                    &nbsp; INT <span th:text="${villano.inteligencia}">0</span>
+                    &nbsp; SAB <span th:text="${villano.sabiduria}">0</span>
+                    &nbsp; CAR <span th:text="${villano.carisma}">0</span>
+                </p>
+            </div>
+            <div class="flex gap-2 flex-wrap items-center shrink-0">
+                <a th:href="@{'/villano/' + ${villano.id}}"
+                   class="bg-rose-800 hover:bg-rose-700 text-white text-xs py-1 px-3 rounded">
+                    Ver ficha
+                </a>
+                <button class="text-red-500 hover:text-red-400 text-xs"
+                        th:onclick="'eliminarVillano(' + ${villano.id} + ')'">✖ Eliminar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- drawer for crear personaje -->
 <div id="drawer" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeDrawer()"></div>
-  <div class="relative bg-gray-800 w-full max-w-md h-full p-6 overflow-auto">
+  <div data-drawer-overlay class="absolute inset-0 bg-black bg-opacity-50" onclick="closeDrawer()"></div>
+  <div data-drawer-panel class="absolute right-0 top-0 z-10 bg-gray-800 w-full max-w-md h-full p-6 overflow-y-auto shadow-2xl">
       <h2 class="text-xl font-bold mb-4">Crear nuevo personaje</h2>
       <p class="text-xs text-cyan-200 mb-3">Al guardar, el personaje recibirá y equipará automáticamente un objeto inicial según su clase.</p>
       <form th:action="@{/personaje}" th:object="${newPersonaje}" method="post" class="space-y-3">
@@ -419,10 +461,132 @@
               <label class="text-sm text-gray-300">Activo</label>
           </div>
           <div class="flex gap-2 mt-4">
-              <button type="submit" class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Guardar</button>
-              <button type="button" class="text-gray-300 hover:text-white" onclick="closeDrawer()">Cancelar</button>
+              <button type="submit" data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white px-4 py-2 rounded">Guardar</button>
+              <button type="button" data-anim-hover class="text-gray-300 hover:text-white" onclick="closeDrawer()">Cancelar</button>
           </div>
       </form>
+  </div>
+</div>
+
+<!-- drawer for crear villano -->
+<div id="villanoDrawer" class="fixed inset-0 z-50 hidden">
+  <div data-drawer-overlay class="absolute inset-0 bg-black bg-opacity-50" onclick="closeVillanoDrawer()"></div>
+  <div data-drawer-panel class="absolute right-0 top-0 z-10 bg-gray-800 w-full max-w-lg h-full p-6 overflow-y-auto shadow-2xl">
+      <h2 class="text-xl font-bold mb-1 text-rose-300">🦹 Crear Villano</h2>
+      <p class="text-xs text-slate-400 mb-4">Crea un villano manualmente o importa un monstruo de la D&amp;D 5e API.</p>
+
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-4 border-b border-slate-600">
+          <button id="tab-manual" onclick="switchVillanoTab('manual')"
+                  class="px-3 py-2 text-sm font-semibold border-b-2 border-rose-400 text-rose-300 transition">
+              ✏️ Manual
+          </button>
+          <button id="tab-api" onclick="switchVillanoTab('api')"
+                  class="px-3 py-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+              🌐 Desde API D&amp;D
+          </button>
+      </div>
+
+      <!-- Tab manual -->
+      <div id="villano-tab-manual">
+          <form th:action="@{/villano}" th:object="${newVillano}" method="post" class="space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                  <div class="col-span-2">
+                      <label class="block text-sm text-gray-300">Nombre <span class="text-rose-400">*</span></label>
+                      <input type="text" th:field="*{nombre}" required class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-sm text-gray-300">Tipo / Raza</label>
+                      <input type="text" th:field="*{tipo}" placeholder="bestia, humanoide…" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-sm text-gray-300">Imagen (URL)</label>
+                      <input type="text" th:field="*{imagen}" placeholder="/img/villano.gif" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-sm text-gray-300">Nivel</label>
+                      <input type="number" min="1" th:field="*{nivel}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-sm text-gray-300">PV Máx</label>
+                      <input type="number" min="0" th:field="*{puntosVidaMax}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-sm text-gray-300">PE (0 = automático)</label>
+                      <input type="number" min="0" th:field="*{puntosEnergia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+              </div>
+              <p class="text-xs text-slate-400 font-semibold mt-2 mb-1">Atributos</p>
+              <div class="grid grid-cols-3 gap-2">
+                  <div>
+                      <label class="block text-xs text-gray-400">FUE</label>
+                      <input type="number" min="0" th:field="*{fuerza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-xs text-gray-400">DES</label>
+                      <input type="number" min="0" th:field="*{destreza}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-xs text-gray-400">CON</label>
+                      <input type="number" min="0" th:field="*{constitucion}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-xs text-gray-400">INT</label>
+                      <input type="number" min="0" th:field="*{inteligencia}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-xs text-gray-400">SAB</label>
+                      <input type="number" min="0" th:field="*{sabiduria}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+                  <div>
+                      <label class="block text-xs text-gray-400">CAR</label>
+                      <input type="number" min="0" th:field="*{carisma}" class="w-full px-2 py-1 rounded bg-gray-700 text-gray-100"/>
+                  </div>
+              </div>
+              <div class="flex gap-2 mt-4">
+                  <button type="submit" data-anim-hover class="bg-rose-800 hover:bg-rose-700 text-white px-4 py-2 rounded">Guardar villano</button>
+                  <button type="button" data-anim-hover class="text-gray-300 hover:text-white" onclick="closeVillanoDrawer()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+
+      <!-- Tab API -->
+      <div id="villano-tab-api" class="hidden">
+          <p class="text-xs text-slate-400 mb-3">Busca un monstruo de la D&amp;D 5e API y crea un villano a partir de él.</p>
+          <div class="flex gap-2 mb-3">
+              <input id="dnd-monster-search" type="text" placeholder="Buscar por nombre…"
+                     oninput="filtrarMonstruos()"
+                     class="flex-1 px-2 py-1 rounded bg-gray-700 text-gray-100 text-sm placeholder-gray-400"/>
+              <button onclick="cargarMonstruos()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded">
+                  Cargar lista
+              </button>
+          </div>
+          <div id="dnd-monster-status" class="text-xs text-slate-400 mb-2 hidden">Cargando monstruos…</div>
+          <div id="dnd-monster-list" class="space-y-1 max-h-72 overflow-y-auto mb-4"></div>
+
+          <!-- Preview del monstruo seleccionado -->
+          <div id="dnd-monster-preview" class="hidden rounded-xl border border-rose-500/30 bg-slate-900 p-3 mb-4 text-sm">
+              <p class="text-rose-300 font-bold mb-1" id="preview-nombre">—</p>
+              <div class="grid grid-cols-2 gap-1 text-xs text-slate-300">
+                  <p>Tipo: <span id="preview-tipo" class="text-cyan-200">—</span></p>
+                  <p>CR: <span id="preview-cr" class="text-amber-300">—</span></p>
+                  <p>HP: <span id="preview-hp" class="text-rose-300">—</span></p>
+                  <p>Nivel equiv.: <span id="preview-nivel" class="text-emerald-300">—</span></p>
+              </div>
+              <div class="grid grid-cols-3 gap-1 text-xs text-slate-300 mt-2">
+                  <p>FUE <span id="preview-str" class="text-amber-200">—</span></p>
+                  <p>DES <span id="preview-dex" class="text-amber-200">—</span></p>
+                  <p>CON <span id="preview-con" class="text-amber-200">—</span></p>
+                  <p>INT <span id="preview-int" class="text-amber-200">—</span></p>
+                  <p>SAB <span id="preview-wis" class="text-amber-200">—</span></p>
+                  <p>CAR <span id="preview-cha" class="text-amber-200">—</span></p>
+              </div>
+              <button id="btn-importar-monstruo" onclick="importarMonstruoSeleccionado()"
+                      class="mt-3 w-full bg-rose-800 hover:bg-rose-700 text-white text-sm py-2 rounded font-semibold">
+                  🦹 Importar como villano
+              </button>
+          </div>
+      </div>
   </div>
 </div>
 
@@ -646,11 +810,11 @@
     }
 
     function openDrawer() {
-        document.getElementById('drawer').classList.remove('hidden');
+        openDrawerPanel('drawer');
     }
 
     function closeDrawer() {
-        document.getElementById('drawer').classList.add('hidden');
+        closeDrawerPanel('drawer');
     }
 
     function eliminarPersonaje(id) {
@@ -664,17 +828,6 @@
                 showToast('Personaje eliminado', true);
             })
             .catch(() => showToast('Error al eliminar', false));
-    }
-
-    function showToast(message, isSuccess = true) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.remove('bg-red-600', 'bg-green-600');
-        toast.classList.add(isSuccess ? 'bg-green-600' : 'bg-red-600');
-        toast.classList.add('opacity-100');
-        setTimeout(() => {
-            toast.classList.remove('opacity-100');
-        }, 2000);
     }
 
     function tirarIniciativa(personajeId) {
@@ -884,6 +1037,165 @@
             console.error(err);
             showToast('Error al actualizar', false);
         });
+    }
+
+    // ─── Villano drawer ──────────────────────────────────────────────────────
+
+    function openVillanoDrawer() {
+        openDrawerPanel('villanoDrawer');
+    }
+
+    function closeVillanoDrawer() {
+        closeDrawerPanel('villanoDrawer');
+    }
+
+    function switchVillanoTab(tab) {
+        const manual = document.getElementById('villano-tab-manual');
+        const api = document.getElementById('villano-tab-api');
+        const tabManual = document.getElementById('tab-manual');
+        const tabApi = document.getElementById('tab-api');
+
+        if (tab === 'manual') {
+            manual.classList.remove('hidden');
+            api.classList.add('hidden');
+            tabManual.classList.add('border-rose-400', 'text-rose-300');
+            tabManual.classList.remove('border-transparent', 'text-slate-400');
+            tabApi.classList.remove('border-rose-400', 'text-rose-300');
+            tabApi.classList.add('border-transparent', 'text-slate-400');
+        } else {
+            api.classList.remove('hidden');
+            manual.classList.add('hidden');
+            tabApi.classList.add('border-rose-400', 'text-rose-300');
+            tabApi.classList.remove('border-transparent', 'text-slate-400');
+            tabManual.classList.remove('border-rose-400', 'text-rose-300');
+            tabManual.classList.add('border-transparent', 'text-slate-400');
+            if (!window._monstersLoaded) cargarMonstruos();
+        }
+    }
+
+    let _allMonsters = [];
+    let _selectedMonsterIndex = null;
+
+    function cargarMonstruos() {
+        const status = document.getElementById('dnd-monster-status');
+        const list = document.getElementById('dnd-monster-list');
+        status.classList.remove('hidden');
+        status.textContent = 'Cargando lista de monstruos…';
+        list.innerHTML = '';
+
+        fetch('/api/dnd/monstruos')
+            .then(resp => {
+                if (!resp.ok) throw new Error('No se pudo cargar la lista');
+                return resp.json();
+            })
+            .then(data => {
+                _allMonsters = data.results || [];
+                window._monstersLoaded = true;
+                status.classList.add('hidden');
+                renderizarMonstruos(_allMonsters);
+            })
+            .catch(err => {
+                status.textContent = 'Error: ' + err.message;
+                console.error(err);
+            });
+    }
+
+    function renderizarMonstruos(monsters) {
+        const list = document.getElementById('dnd-monster-list');
+        list.innerHTML = '';
+        if (!monsters.length) {
+            list.innerHTML = '<p class="text-xs text-slate-400">No hay resultados.</p>';
+            return;
+        }
+        monsters.forEach(m => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = m.name;
+            btn.dataset.index = m.index;
+            btn.className = 'w-full text-left text-sm px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 truncate';
+            btn.onclick = () => seleccionarMonstruo(m.index, m.name);
+            list.appendChild(btn);
+        });
+    }
+
+    function filtrarMonstruos() {
+        const q = document.getElementById('dnd-monster-search').value.toLowerCase();
+        const filtered = _allMonsters.filter(m => m.name.toLowerCase().includes(q));
+        renderizarMonstruos(filtered);
+    }
+
+    function seleccionarMonstruo(index, name) {
+        _selectedMonsterIndex = index;
+        const preview = document.getElementById('dnd-monster-preview');
+        preview.classList.remove('hidden');
+        document.getElementById('preview-nombre').textContent = '⏳ Cargando ' + name + '…';
+        ['preview-tipo','preview-cr','preview-hp','preview-nivel',
+         'preview-str','preview-dex','preview-con','preview-int','preview-wis','preview-cha']
+            .forEach(id => { document.getElementById(id).textContent = '—'; });
+
+        fetch(`/api/dnd/monstruos/${index}`)
+            .then(resp => {
+                if (!resp.ok) throw new Error('No se pudo cargar el monstruo');
+                return resp.json();
+            })
+            .then(data => {
+                const nivel = Math.max(1, Math.ceil(data.challengeRating ?? data.challenge_rating ?? 0));
+                document.getElementById('preview-nombre').textContent = data.name;
+                document.getElementById('preview-tipo').textContent = data.type ?? '—';
+                document.getElementById('preview-cr').textContent = data.challengeRating ?? data.challenge_rating ?? '—';
+                document.getElementById('preview-hp').textContent = data.hitPoints ?? data.hit_points ?? '—';
+                document.getElementById('preview-nivel').textContent = nivel;
+                document.getElementById('preview-str').textContent = data.strength ?? '—';
+                document.getElementById('preview-dex').textContent = data.dexterity ?? '—';
+                document.getElementById('preview-con').textContent = data.constitution ?? '—';
+                document.getElementById('preview-int').textContent = data.intelligence ?? '—';
+                document.getElementById('preview-wis').textContent = data.wisdom ?? '—';
+                document.getElementById('preview-cha').textContent = data.charisma ?? '—';
+            })
+            .catch(err => {
+                document.getElementById('preview-nombre').textContent = 'Error al cargar';
+                console.error(err);
+            });
+    }
+
+    function importarMonstruoSeleccionado() {
+        if (!_selectedMonsterIndex) return;
+        const btn = document.getElementById('btn-importar-monstruo');
+        btn.disabled = true;
+        btn.textContent = '⏳ Importando…';
+
+        fetch(`/api/dnd/importar/monstruo/${_selectedMonsterIndex}`, { method: 'POST' })
+            .then(async resp => {
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => null);
+                    throw new Error(err?.message || 'Error al importar');
+                }
+                return resp.json();
+            })
+            .then(data => {
+                showToast(`Villano importado: ${data.nombre} (nivel ${data.nivel})`, true);
+                closeVillanoDrawer();
+                setTimeout(() => location.reload(), 800);
+            })
+            .catch(err => {
+                showToast(err.message || 'Error al importar monstruo', false);
+                btn.disabled = false;
+                btn.textContent = '🦹 Importar como villano';
+            });
+    }
+
+    function eliminarVillano(id) {
+        if (!confirm('¿Eliminar este villano?')) return;
+        fetch(`/villano/${id}`, { method: 'DELETE' })
+            .then(resp => {
+                if (!resp.ok) throw new Error();
+                return resp.json();
+            })
+            .then(data => {
+                document.getElementById(`villano_card_${id}`)?.remove();
+                showToast(`Villano eliminado: ${data.nombre}`, true);
+            })
+            .catch(() => showToast('Error al eliminar villano', false));
     }
 </script>
 

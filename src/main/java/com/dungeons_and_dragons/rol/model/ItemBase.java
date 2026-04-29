@@ -6,9 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class ItemBase {
 
     @Id
@@ -39,5 +41,18 @@ public class ItemBase {
 
     // Si el objeto es mágico o especial
     private boolean magico;
+    private boolean equipable;
+    private String slotEquipamento;
+    private int bonusFuerza;
+    private int bonusDestreza;
+    private int bonusConstitucion;
+    private int bonusInteligencia;
+    private int bonusSabiduria;
+    private int bonusCarisma;
+    private int bonusVida;
+    private int bonusEnergia;
+    private int bonusAtaque;
+    private int bonusDefensa;
+    private int bonusIniciativa;
 
 }

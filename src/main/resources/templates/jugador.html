@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Vista del Jugador')}"></head>
-<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen text-gray-100 p-4" th:attr="data-batalla-activa=${batallaActiva != null}">
+<body data-view="jugador" class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen text-gray-100 p-4" th:attr="data-batalla-activa=${batallaActiva != null}">
 
-<h1 class="text-2xl md:text-4xl text-center text-cyan-300 mt-6 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 6px #38bdf8;">
+<h1 data-anim-hero class="text-2xl md:text-4xl text-center text-cyan-300 mt-6 mb-6" style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 6px #38bdf8;">
     Vista del Jugador
 </h1>
 
-<div class="max-w-5xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${personaje != null}" data-anim-panel="player-root">
+<div data-anim-page class="max-w-5xl mx-auto bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 shadow-2xl" th:if="${personaje != null}" data-anim-panel="player-root">
     <div class="mb-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4 min-w-0">
@@ -129,7 +129,7 @@
                     <p>HP: <span class="text-amber-300 font-bold" data-player-life th:text="${personaje.puntosVida}">0</span> / <span th:text="${personaje.puntosVidaMax}">0</span></p>
                     <p>PE: <span class="text-fuchsia-300 font-bold" id="energia" th:text="${personaje.puntosEnergia}">0</span></p>
                     <p>Iniciativa: <span class="text-cyan-300" id="iniciativa">-</span></p>
-                    <button class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                    <button data-anim-hover class="mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
                             th:onclick="'tirarIniciativa(' + ${personaje.id} + ')'">Tirar iniciativa</button>
                 </div>
 
@@ -164,9 +164,9 @@
                 </p>
 
                 <div class="flex flex-wrap gap-2 mb-3">
-                    <button class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded"
+                    <button data-anim-hover class="bg-red-700 hover:bg-red-600 text-white text-xs py-2 px-3 rounded"
                             th:onclick="'atacarEnBatalla(' + ${personaje.id} + ')'">Atacar</button>
-                    <button class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-2 px-3 rounded"
+                    <button data-anim-hover class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-2 px-3 rounded"
                             th:onclick="'finalizarTurnoBatalla(' + ${personaje.id} + ')'">Finalizar turno</button>
                 </div>
 
@@ -205,13 +205,13 @@
                     <span class="text-[11px] text-slate-400">Acciones mágicas en combate</span>
                 </div>
                 <div id="hechizos" class="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    <div th:each="hechizo : ${personaje.hechizos}" class="border-b border-slate-600 pb-2 text-sm">
+                    <div th:each="hechizo : ${personaje.hechizos}" data-anim-card="player-spell" class="border-b border-slate-600 pb-2 text-sm">
                         <p>
                             <span class="text-yellow-200" th:text="${hechizo.nombre}">Hechizo</span>
                             (Nivel <span th:text="${hechizo.nivel}">1</span>)
                         </p>
                         <p class="text-xs text-gray-300" th:text="${hechizo.descripcion}">Descripción</p>
-                        <button class="mt-1 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
+                        <button data-anim-hover class="mt-1 bg-indigo-700 hover:bg-indigo-600 text-white text-xs py-1 px-2 rounded"
                                 th:onclick="'lanzarHechizo(' + ${personaje.id} + ',' + ${hechizo.id} + ')'"
                                 th:text="${batallaActiva != null ? 'Lanzar en combate' : 'Lanzar'}">Lanzar</button>
                     </div>
@@ -224,16 +224,16 @@
         <div class="bg-slate-700 rounded p-3">
             <p class="font-semibold text-yellow-300 mb-2">Inventario</p>
             <div id="inventario" class="space-y-2">
-                <div th:each="item : ${personaje.inventario}" th:id="${'item_' + item.id}" class="flex justify-between items-center text-sm border-b border-slate-600 pb-2">
+                <div th:each="item : ${personaje.inventario}" th:id="${'item_' + item.id}" data-anim-card="player-item" class="flex justify-between items-center text-sm border-b border-slate-600 pb-2">
                     <div>
                         <span th:text="${item.itemBase.nombre}">Ítem</span>
                         <span class="ml-2">x<span th:id="${'item_cantidad_' + item.id}" th:text="${item.cantidad}">1</span></span>
                         <span class="ml-2 text-xs text-emerald-300" th:id="${'item_estado_' + item.id}" th:text="${item.equipado ? 'Equipado' : ''}"></span>
                     </div>
                     <div class="flex gap-1">
-                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
-                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
-                        <button class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
+                        <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'usarItem(' + ${item.id} + ')'">Usar</button>
+                        <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'equiparItem(' + ${item.id} + ')'">Equipar</button>
+                        <button data-anim-hover class="bg-purple-900 hover:bg-purple-800 text-white text-xs py-1 px-2 rounded" th:onclick="'desequiparItem(' + ${item.id} + ')'">Desequipar</button>
                     </div>
                 </div>
             </div>
@@ -320,9 +320,40 @@
                 const cantidad = document.getElementById(`item_cantidad_${id}`);
                 const estado = document.getElementById(`item_estado_${id}`);
                 const bloque = document.getElementById(`item_${id}`);
-                if (cantidad) cantidad.textContent = data.cantidad;
-                if (estado) estado.textContent = data.consumido ? 'Consumido' : (data.equipado ? 'Equipado' : '');
-                if (bloque && data.consumido && Number(data.cantidad) <= 0) bloque.remove();
+
+                if (cantidad) {
+                    cantidad.textContent = data.cantidad;
+                    animateValueChange(cantidad);
+                }
+
+                if (estado) {
+                    estado.textContent = data.consumido ? 'Consumido' : (data.equipado ? 'Equipado' : '');
+                    animateValueChange(estado);
+                }
+
+                if (bloque) {
+                    animateBattleImpact(
+                        bloque,
+                        accion === 'usar' ? 'rgba(34, 197, 94, 0.45)' : 'rgba(168, 85, 247, 0.45)'
+                    );
+                }
+
+                if (bloque && data.consumido && Number(data.cantidad) <= 0) {
+                    if (typeof window.anime === 'function') {
+                        window.anime({
+                            targets: bloque,
+                            opacity: [1, 0],
+                            translateX: [0, 18],
+                            scale: [1, 0.96],
+                            duration: 220,
+                            easing: 'easeInQuad',
+                            complete: () => bloque.remove()
+                        });
+                    } else {
+                        bloque.remove();
+                    }
+                }
+
                 showToast(`${mensajeExito}: ${data.nombre}`, true);
             })
             .catch(() => showToast('Error en inventario', false));
